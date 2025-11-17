@@ -1,0 +1,49 @@
+# Node.js
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directories
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+.cache/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Temporary files
+tmp/
+temp/
+*.swp
+*~
+
+# Misc
+*.tgz
+.env.test
+
