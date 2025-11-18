@@ -9,6 +9,7 @@ const Receta = require('../models/RecetaModel');
 const Inventario = require('../models/InventarioModel');
 const Pedido = require('../models/PedidoModel');
 const DetallePedido = require('../models/DetallePedidoModel');
+const MovimientoInventario = require('../models/MovimientoInventarioModel');
 
 const createTables = async () => {
   try {
@@ -28,6 +29,7 @@ const createTables = async () => {
     console.log('  - inventarios');
     console.log('  - pedidos');
     console.log('  - detalle_pedidos');
+    console.log('  - movimientos_inventario');
 
     return true;
   } catch (error) {
@@ -197,6 +199,25 @@ const seedDatabase = async () => {
       { id_pedido: 3, id_producto: 6, cantidad: 1, precio_unitario: 35.00, subtotal: 35.00 }
     ]);
     console.log(`✓ ${detalles.length} detalles de pedidos creados.`);
+
+    // Crear movimientos de inventario
+    const movimientos = await MovimientoInventario.bulkCreate([
+      // Entradas iniciales
+      { id_ingrediente: 1, tipo_movimiento: 'entrada', cantidad: 30.000, id_empleado: 1, notas: 'Compra inicial' },
+      { id_ingrediente: 2, tipo_movimiento: 'entrada', cantidad: 50.000, id_empleado: 1, notas: 'Compra inicial' },
+      { id_ingrediente: 3, tipo_movimiento: 'entrada', cantidad: 10.000, id_empleado: 1, notas: 'Compra inicial' },
+      
+      // Salidas por pedidos
+      { id_ingrediente: 1, tipo_movimiento: 'salida', cantidad: 2.000, id_pedido: 2, id_empleado: 3, notas: 'Salida por pedido' },
+      { id_ingrediente: 5, tipo_movimiento: 'salida', cantidad: 0.150, id_pedido: 1, id_empleado: 3, notas: 'Salida por pedido' },
+      
+      // Ajustes
+      { id_ingrediente: 4, tipo_movimiento: 'ajuste', cantidad: 2.000, id_empleado: 2, notas: 'Ajuste de inventario' },
+      
+      // Mermas
+      { id_ingrediente: 6, tipo_movimiento: 'merma', cantidad: 0.500, id_empleado: 2, notas: 'Producto vencido' }
+    ]);
+    console.log(`✓ ${movimientos.length} movimientos de inventario creados.`);
 
     console.log('\n✓ Datos de prueba insertados exitosamente.');
     return true;

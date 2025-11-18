@@ -97,6 +97,11 @@ Pedido.associate = (models) => {
     foreignKey: 'id_pedido',
     as: 'detalles'
   });
+  
+  Pedido.hasMany(models.MovimientoInventario, {
+    foreignKey: 'id_pedido',
+    as: 'movimientos_inventario'
+  });
 };
 
 module.exports = Pedido;

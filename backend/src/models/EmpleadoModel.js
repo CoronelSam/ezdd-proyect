@@ -112,6 +112,11 @@ Empleado.associate = (models) => {
     foreignKey: 'id_empleado',
     as: 'pedidos'
   });
+  
+  Empleado.hasMany(models.MovimientoInventario, {
+    foreignKey: 'id_empleado',
+    as: 'movimientos_inventario'
+  });
 };
 
 module.exports = Empleado;

@@ -88,6 +88,11 @@ Ingrediente.associate = (models) => {
     foreignKey: 'id_ingrediente',
     as: 'inventario'
   });
+  
+  Ingrediente.hasMany(models.MovimientoInventario, {
+    foreignKey: 'id_ingrediente',
+    as: 'movimientos'
+  });
 };
 
 module.exports = Ingrediente;

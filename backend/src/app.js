@@ -12,6 +12,7 @@ const ingredienteRoutes = require('./routes/ingrediente.Routes');
 const recetaRoutes = require('./routes/receta.Routes');
 const inventarioRoutes = require('./routes/inventario.Routes');
 const pedidoRoutes = require('./routes/pedido.Routes');
+const movimientoInventarioRoutes = require('./routes/movimientoInventario.Routes');
 
 require('./models/ClienteModel');
 require('./models/EmpleadoModel');
@@ -23,6 +24,7 @@ require('./models/RecetaModel');
 require('./models/InventarioModel');
 require('./models/PedidoModel');
 require('./models/DetallePedidoModel');
+require('./models/MovimientoInventarioModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +42,7 @@ app.use('/api/ingredientes', ingredienteRoutes);
 app.use('/api/recetas', recetaRoutes);
 app.use('/api/inventarios', inventarioRoutes);
 app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/movimientos-inventario', movimientoInventarioRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 
@@ -54,7 +57,8 @@ app.get('/', (req, res) => {
       ingredientes: '/api/ingredientes',
       recetas: '/api/recetas',
       inventarios: '/api/inventarios',
-      pedidos: '/api/pedidos'
+      pedidos: '/api/pedidos',
+      movimientos_inventario: '/api/movimientos-inventario'
     }
   });
 });
