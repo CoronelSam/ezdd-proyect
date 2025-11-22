@@ -1,82 +1,36 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Páginas de login
-import Login from "./pages/Login";
+import AdminLayout from "../admin/pages/AdminLayout";
+import GestionMenu from "../admin/pages/GestionMenu";
+import GestionPedidos from "../admin/pages/GestionPedidos";
 
-// Páginas Admin
-import AdminDashboard from "./pages/AdminDashboard";
-import GestionMenu from "./pages/GestionMenu";
-import GestionPedidos from "./pages/GestionPedidos";
+import ClienteLayout from "../cliente/ClienteLayout";
+import HomeCliente from "../cliente/pages/HomeCliente";
+import MenuCliente from "../cliente/pages/MenuCliente";
+import PerfilCliente from "../cliente/pages/PerfilCliente";
+import ContactoCliente from "../cliente/pages/Contacto";
 
-// Páginas Cliente
-import ClientHome from "./pages/ClientHome";
-import MenuCliente from "./pages/MenuCliente";
-import PerfilCliente from "./pages/PerfilCliente";
-
-// Ruta protegida
-import ProtectedRoute from "./ProtectedRoute";
-
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login */}
-        <Route path="/" element={<Login />} />
 
-        {/* Rutas Admin */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute rolNecesario="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/menu"
-          element={
-            <ProtectedRoute rolNecesario="admin">
-              <GestionMenu />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/pedidos"
-          element={
-            <ProtectedRoute rolNecesario="admin">
-              <GestionPedidos />
-            </ProtectedRoute>
-          }
-        />
+        {/* Rutas ADMIN */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="menu" element={<GestionMenu />} />
+          <Route path="pedidos" element={<GestionPedidos />} />
+        </Route>
 
-        {/* Rutas Cliente */}
-        <Route
-          path="/cliente"
-          element={
-            <ProtectedRoute rolNecesario="cliente">
-              <ClientHome />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cliente/menu"
-          element={
-            <ProtectedRoute rolNecesario="cliente">
-              <MenuCliente />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/cliente/perfil"
-          element={
-            <ProtectedRoute rolNecesario="cliente">
-              <PerfilCliente />
-            </ProtectedRoute>
-          }
-        />
+        {/* Rutas CLIENTE */}
+        <Route path="/cliente" element={<ClienteLayout />}>
+          <Route index element={<HomeCliente />} />
+          <Route path="menu" element={<MenuCliente />} />
+          <Route path="perfil" element={<PerfilCliente />} />
+          <Route path="contacto" element={<ContactoCliente />} />
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );
 }
 
-export default App;
