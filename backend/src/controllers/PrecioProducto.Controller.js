@@ -306,6 +306,38 @@ class PrecioProductoController {
       });
     }
   }
+
+  async establecerDefault(req, res) {
+    try {
+      const { id } = req.params;
+      const resultado = await PrecioProductoService.establecerPrecioDefault(id);
+      
+      res.status(200).json({
+        mensaje: 'Precio establecido como predeterminado exitosamente',
+        precio: resultado
+      });
+    } catch (error) {
+      console.error('Error al establecer precio por defecto:', error);
+      
+      if (error.message === 'Precio no encontrado' || 
+          error.message === 'El producto asociado no existe') {
+        return res.status(404).json({ 
+          error: error.message 
+        });
+      }
+
+      if (error.message === 'No se puede establecer como predeterminado un precio inactivo') {
+        return res.status(400).json({ 
+          error: error.message 
+        });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al establecer el precio por defecto',
+        mensaje: error.message 
+      });
+    }
+  }
 }
 
 module.exports = new PrecioProductoController();

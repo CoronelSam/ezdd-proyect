@@ -16,8 +16,11 @@ class ProductoService {
         throw new Error('La categoría especificada está inactiva');
       }
 
+      // Excluir el campo 'precio' si viene en los datos (ahora se maneja en PrecioProducto)
+      const { precio, ...datosProducto } = productoData;
+
       const nuevoProducto = await Producto.create({
-        ...productoData,
+        ...datosProducto,
         activo: true
       });
 
@@ -48,13 +51,26 @@ class ProductoService {
         where.id_categoria = filtros.id_categoria;
       }
 
+      const PrecioProducto = require('./PrecioProductoService');
       const productos = await Producto.findAll({
         where,
-        include: [{
-          model: CategoriaProducto,
-          as: 'categoria',
-          attributes: ['id_categoria', 'nombre']
-        }],
+        include: [
+          {
+            model: CategoriaProducto,
+            as: 'categoria',
+            attributes: ['id_categoria', 'nombre']
+          },
+          {
+            model: require('../models/PrecioProductoModel'),
+            as: 'precio_default',
+            attributes: ['id_precio', 'nombre_presentacion', 'precio']
+          },
+          {
+            model: require('../models/PrecioProductoModel'),
+            as: 'precios',
+            attributes: ['id_precio', 'nombre_presentacion', 'descripcion', 'precio', 'es_default', 'activo']
+          }
+        ],
         order: [['nombre', 'ASC']]
       });
 
@@ -67,11 +83,23 @@ class ProductoService {
   async obtenerProductoPorId(id) {
     try {
       const producto = await Producto.findByPk(id, {
-        include: [{
-          model: CategoriaProducto,
-          as: 'categoria',
-          attributes: ['id_categoria', 'nombre', 'descripcion']
-        }]
+        include: [
+          {
+            model: CategoriaProducto,
+            as: 'categoria',
+            attributes: ['id_categoria', 'nombre', 'descripcion']
+          },
+          {
+            model: require('../models/PrecioProductoModel'),
+            as: 'precio_default',
+            attributes: ['id_precio', 'nombre_presentacion', 'precio', 'descripcion']
+          },
+          {
+            model: require('../models/PrecioProductoModel'),
+            as: 'precios',
+            attributes: ['id_precio', 'nombre_presentacion', 'descripcion', 'precio', 'es_default', 'activo']
+          }
+        ]
       });
 
       if (!producto) {
@@ -145,9 +173,12 @@ class ProductoService {
         throw new Error('Producto no encontrado');
       }
 
+      // Excluir el campo 'precio' si viene en los datos (ahora se maneja en PrecioProducto)
+      const { precio, ...datosProducto } = datosActualizados;
+
       // Si se actualiza la categoría, verificar que exista y esté activa
-      if (datosActualizados.id_categoria) {
-        const categoria = await CategoriaProducto.findByPk(datosActualizados.id_categoria);
+      if (datosProducto.id_categoria) {
+        const categoria = await CategoriaProducto.findByPk(datosProducto.id_categoria);
         
         if (!categoria) {
           throw new Error('La categoría especificada no existe');
@@ -158,7 +189,7 @@ class ProductoService {
         }
       }
 
-      await producto.update(datosActualizados);
+      await producto.update(datosProducto);
 
       // Obtener el producto actualizado con la categoría
       const productoActualizado = await Producto.findByPk(id, {
@@ -170,26 +201,6 @@ class ProductoService {
       });
 
       return productoActualizado;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async actualizarPrecio(id, nuevoPrecio) {
-    try {
-      const producto = await Producto.findByPk(id);
-
-      if (!producto) {
-        throw new Error('Producto no encontrado');
-      }
-
-      if (nuevoPrecio < 0) {
-        throw new Error('El precio debe ser mayor o igual a 0');
-      }
-
-      await producto.update({ precio: nuevoPrecio });
-
-      return producto;
     } catch (error) {
       throw error;
     }

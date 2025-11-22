@@ -25,7 +25,11 @@ const validacionCrear = [
         throw new Error('El precio debe ser mayor o igual a 0');
       }
       return true;
-    })
+    }),
+  
+  body('es_default')
+    .optional()
+    .isBoolean().withMessage('El campo es_default debe ser un booleano')
 ];
 
 const validacionActualizar = [
@@ -51,6 +55,10 @@ const validacionActualizar = [
       return true;
     }),
   
+  body('es_default')
+    .optional()
+    .isBoolean().withMessage('El campo es_default debe ser un booleano'),
+  
   body('activo')
     .optional()
     .isBoolean().withMessage('El campo activo debe ser un booleano')
@@ -75,6 +83,7 @@ router.get('/producto/:idProducto', validacionIdProducto, PrecioProductoControll
 router.get('/producto/:idProducto/presentacion/:nombrePresentacion', PrecioProductoController.obtenerPorPresentacion);
 router.get('/:id', validacionId, PrecioProductoController.obtenerPorId);
 router.put('/:id', validacionActualizar, PrecioProductoController.actualizar);
+router.patch('/:id/establecer-default', validacionId, PrecioProductoController.establecerDefault);
 router.patch('/:id/reactivar', validacionId, PrecioProductoController.reactivar);
 router.delete('/:id', validacionId, PrecioProductoController.eliminar);
 router.delete('/:id/permanente', validacionId, PrecioProductoController.eliminarPermanente);

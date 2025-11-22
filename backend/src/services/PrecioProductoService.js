@@ -4,6 +4,9 @@ const Producto = require('../models/ProductoModel');
 class PrecioProductoService {
 
   async crearPrecioProducto(precioData) {
+    const sequelize = require('../config/database');
+    const transaction = await sequelize.transaction();
+    
     try {
       // Verificar que el producto exista
       const producto = await Producto.findByPk(precioData.id_producto);
@@ -16,13 +19,41 @@ class PrecioProductoService {
         throw new Error('El producto especificado está inactivo');
       }
 
+      // Si es_default es true, quitar el default de otros precios del mismo producto
+      if (precioData.es_default) {
+        await PrecioProducto.update(
+          { es_default: false },
+          { 
+            where: { 
+              id_producto: precioData.id_producto,
+              es_default: true 
+            },
+            transaction 
+          }
+        );
+      }
+
       const nuevoPrecio = await PrecioProducto.create({
         ...precioData,
         activo: true
+      }, { transaction });
+
+      // Si es el primer precio o es_default es true, establecerlo como precio default del producto
+      const cantidadPrecios = await PrecioProducto.count({
+        where: { id_producto: precioData.id_producto }
       });
 
+      if (cantidadPrecios === 1 || precioData.es_default) {
+        await producto.update(
+          { id_precio_default: nuevoPrecio.id_precio },
+          { transaction }
+        );
+      }
+
+      await transaction.commit();
       return nuevoPrecio;
     } catch (error) {
+      await transaction.rollback();
       throw error;
     }
   }
@@ -134,8 +165,37 @@ class PrecioProductoService {
         throw new Error('Precio no encontrado');
       }
 
+      // Verificar que no sea el único precio activo del producto
+      const preciosActivos = await PrecioProducto.count({
+        where: {
+          id_producto: precio.id_producto,
+          activo: true
+        }
+      });
+
+      if (preciosActivos <= 1) {
+        throw new Error('No se puede desactivar el único precio activo del producto');
+      }
+
+      // Si es el precio default, asignar otro como default
+      if (precio.es_default) {
+        const otroPrecio = await PrecioProducto.findOne({
+          where: {
+            id_producto: precio.id_producto,
+            activo: true,
+            id_precio: { [require('sequelize').Op.ne]: id }
+          }
+        });
+
+        if (otroPrecio) {
+          await otroPrecio.update({ es_default: true });
+          const producto = await Producto.findByPk(precio.id_producto);
+          await producto.update({ id_precio_default: otroPrecio.id_precio });
+        }
+      }
+
       // Soft delete: cambiar el estado a inactivo
-      await precio.update({ activo: false });
+      await precio.update({ activo: false, es_default: false });
 
       return { mensaje: 'Precio desactivado exitosamente' };
     } catch (error) {
@@ -194,6 +254,51 @@ class PrecioProductoService {
         preciosInactivos
       };
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async establecerPrecioDefault(idPrecio) {
+    const sequelize = require('../config/database');
+    const transaction = await sequelize.transaction();
+    
+    try {
+      const precio = await PrecioProducto.findByPk(idPrecio);
+
+      if (!precio) {
+        throw new Error('Precio no encontrado');
+      }
+
+      if (!precio.activo) {
+        throw new Error('No se puede establecer como default un precio inactivo');
+      }
+
+      // Quitar es_default de otros precios del producto
+      await PrecioProducto.update(
+        { es_default: false },
+        { 
+          where: { 
+            id_producto: precio.id_producto,
+            es_default: true 
+          },
+          transaction 
+        }
+      );
+
+      // Establecer este precio como default
+      await precio.update({ es_default: true }, { transaction });
+
+      // Actualizar el producto
+      const producto = await Producto.findByPk(precio.id_producto);
+      await producto.update(
+        { id_precio_default: idPrecio },
+        { transaction }
+      );
+
+      await transaction.commit();
+      return precio;
+    } catch (error) {
+      await transaction.rollback();
       throw error;
     }
   }

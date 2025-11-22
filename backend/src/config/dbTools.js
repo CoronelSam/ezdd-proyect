@@ -79,30 +79,55 @@ const seedDatabase = async () => {
     console.log(`✓ ${categorias.length} categorías creadas.`);
 
     const productos = await Producto.bulkCreate([
-      { nombre: 'Ensalada César', descripcion: 'Ensalada fresca con aderezo césar', precio: 89.99, id_categoria: 1, imagen_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1', activo: true },
-      { nombre: 'Sopa de Tomate', descripcion: 'Sopa cremosa de tomate', precio: 65.00, id_categoria: 1, imagen_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd', activo: true },
-      { nombre: 'Pollo Frito', descripcion: 'Pollo frito crujiente', precio: null, id_categoria: 2, imagen_url: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec', activo: true },
-      { nombre: 'Pasta Alfredo', descripcion: 'Pasta con salsa alfredo', precio: 150.00, id_categoria: 2, imagen_url: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9', activo: true },
-      { nombre: 'Tiramisú', descripcion: 'Postre italiano tradicional', precio: 85.00, id_categoria: 3, imagen_url: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9', activo: true },
-      { nombre: 'Café', descripcion: 'Café', precio: null, id_categoria: 4, imagen_url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93', activo: true },
-      { nombre: 'Jugo de Naranja', descripcion: 'Jugo natural de naranja', precio: 40.00, id_categoria: 4, imagen_url: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba', activo: true }
+      { nombre: 'Ensalada César', descripcion: 'Ensalada fresca con aderezo césar', id_categoria: 1, imagen_url: 'https://images.unsplash.com/photo-1546793665-c74683f339c1', activo: true },
+      { nombre: 'Sopa de Tomate', descripcion: 'Sopa cremosa de tomate', id_categoria: 1, imagen_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd', activo: true },
+      { nombre: 'Pollo Frito', descripcion: 'Pollo frito crujiente', id_categoria: 2, imagen_url: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec', activo: true },
+      { nombre: 'Pasta Alfredo', descripcion: 'Pasta con salsa alfredo', id_categoria: 2, imagen_url: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9', activo: true },
+      { nombre: 'Tiramisú', descripcion: 'Postre italiano tradicional', id_categoria: 3, imagen_url: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9', activo: true },
+      { nombre: 'Café', descripcion: 'Café', id_categoria: 4, imagen_url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93', activo: true },
+      { nombre: 'Jugo de Naranja', descripcion: 'Jugo natural de naranja', id_categoria: 4, imagen_url: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba', activo: true }
     ]);
     console.log(`✓ ${productos.length} productos creados.`);
 
-    // Crear precios para productos con variantes
+    // Crear precios para todos los productos
     const precios = await PrecioProducto.bulkCreate([
-      // Pollo Frito (id_producto: 3)
-      { id_producto: 3, nombre_presentacion: '3 Piezas', descripcion: '3 piezas de pollo frito', precio: 89.00, activo: true },
-      { id_producto: 3, nombre_presentacion: '6 Piezas', descripcion: '6 piezas de pollo frito', precio: 159.00, activo: true },
-      { id_producto: 3, nombre_presentacion: '9 Piezas', descripcion: '9 piezas de pollo frito', precio: 219.00, activo: true },
-      { id_producto: 3, nombre_presentacion: '12 Piezas', descripcion: '12 piezas de pollo frito', precio: 279.00, activo: true },
+      // Ensalada César (id_producto: 1) - Precio único
+      { id_producto: 1, nombre_presentacion: 'Porción individual', descripcion: 'Ensalada César individual', precio: 89.99, es_default: true, activo: true },
       
-      // Café (id_producto: 6)
-      { id_producto: 6, nombre_presentacion: 'Chico', descripcion: 'Café tamaño chico (8 oz)', precio: 25.00, activo: true },
-      { id_producto: 6, nombre_presentacion: 'Mediano', descripcion: 'Café tamaño mediano (12 oz)', precio: 35.00, activo: true },
-      { id_producto: 6, nombre_presentacion: 'Grande', descripcion: 'Café tamaño grande (16 oz)', precio: 45.00, activo: true }
+      // Sopa de Tomate (id_producto: 2) - Precio único
+      { id_producto: 2, nombre_presentacion: 'Porción individual', descripcion: 'Sopa de tomate individual', precio: 65.00, es_default: true, activo: true },
+      
+      // Pollo Frito (id_producto: 3) - Múltiples presentaciones
+      { id_producto: 3, nombre_presentacion: '3 Piezas', descripcion: '3 piezas de pollo frito', precio: 89.00, es_default: true, activo: true },
+      { id_producto: 3, nombre_presentacion: '6 Piezas', descripcion: '6 piezas de pollo frito', precio: 159.00, es_default: false, activo: true },
+      { id_producto: 3, nombre_presentacion: '9 Piezas', descripcion: '9 piezas de pollo frito', precio: 219.00, es_default: false, activo: true },
+      { id_producto: 3, nombre_presentacion: '12 Piezas', descripcion: '12 piezas de pollo frito', precio: 279.00, es_default: false, activo: true },
+      
+      // Pasta Alfredo (id_producto: 4) - Precio único
+      { id_producto: 4, nombre_presentacion: 'Porción individual', descripcion: 'Pasta Alfredo individual', precio: 150.00, es_default: true, activo: true },
+      
+      // Tiramisú (id_producto: 5) - Precio único
+      { id_producto: 5, nombre_presentacion: 'Porción individual', descripcion: 'Tiramisú individual', precio: 85.00, es_default: true, activo: true },
+      
+      // Café (id_producto: 6) - Múltiples tamaños
+      { id_producto: 6, nombre_presentacion: 'Chico', descripcion: 'Café tamaño chico (8 oz)', precio: 25.00, es_default: true, activo: true },
+      { id_producto: 6, nombre_presentacion: 'Mediano', descripcion: 'Café tamaño mediano (12 oz)', precio: 35.00, es_default: false, activo: true },
+      { id_producto: 6, nombre_presentacion: 'Grande', descripcion: 'Café tamaño grande (16 oz)', precio: 45.00, es_default: false, activo: true },
+      
+      // Jugo de Naranja (id_producto: 7) - Precio único
+      { id_producto: 7, nombre_presentacion: 'Vaso 16 oz', descripcion: 'Jugo natural de naranja', precio: 40.00, es_default: true, activo: true }
     ]);
     console.log(`✓ ${precios.length} precios de productos creados.`);
+
+    // Actualizar id_precio_default en productos
+    await productos[0].update({ id_precio_default: precios[0].id_precio }); // Ensalada César
+    await productos[1].update({ id_precio_default: precios[1].id_precio }); // Sopa de Tomate
+    await productos[2].update({ id_precio_default: precios[2].id_precio }); // Pollo Frito -> 3 Piezas
+    await productos[3].update({ id_precio_default: precios[6].id_precio }); // Pasta Alfredo
+    await productos[4].update({ id_precio_default: precios[7].id_precio }); // Tiramisú
+    await productos[5].update({ id_precio_default: precios[8].id_precio }); // Café -> Chico
+    await productos[6].update({ id_precio_default: precios[11].id_precio }); // Jugo de Naranja
+    console.log(`✓ Referencias de precios predeterminados actualizadas.`);
 
     const empleados = await Empleado.bulkCreate([
       { nombre: 'Juan Pérez', email: 'juan@restaurant.com', telefono: '555-0101', puesto: 'Gerente', salario: 15000.00, activo: true },
@@ -184,19 +209,19 @@ const seedDatabase = async () => {
     ]);
     console.log(`✓ ${pedidos.length} pedidos creados.`);
 
-    // Crear detalles de pedidos
+    // Crear detalles de pedidos (usando los precios de la tabla precio_productos)
     const detalles = await DetallePedido.bulkCreate([
       // Pedido 1
-      { id_pedido: 1, id_producto: 1, cantidad: 1, precio_unitario: 89.99, subtotal: 89.99 },
-      { id_pedido: 1, id_producto: 4, cantidad: 1, precio_unitario: 150.00, subtotal: 150.00 },
+      { id_pedido: 1, id_producto: 1, cantidad: 1, precio_unitario: 89.99, subtotal: 89.99 }, // Ensalada César
+      { id_pedido: 1, id_producto: 4, cantidad: 1, precio_unitario: 150.00, subtotal: 150.00 }, // Pasta Alfredo
       
       // Pedido 2
-      { id_pedido: 2, id_producto: 3, cantidad: 2, precio_unitario: 89.00, subtotal: 178.00, instrucciones_especiales: 'Bien cocido' },
-      { id_pedido: 2, id_producto: 7, cantidad: 1, precio_unitario: 40.00, subtotal: 40.00 },
+      { id_pedido: 2, id_producto: 3, cantidad: 2, precio_unitario: 89.00, subtotal: 178.00, instrucciones_especiales: 'Bien cocido' }, // Pollo Frito 3 piezas
+      { id_pedido: 2, id_producto: 7, cantidad: 1, precio_unitario: 40.00, subtotal: 40.00 }, // Jugo de Naranja
       
       // Pedido 3
-      { id_pedido: 3, id_producto: 5, cantidad: 1, precio_unitario: 85.00, subtotal: 85.00 },
-      { id_pedido: 3, id_producto: 6, cantidad: 1, precio_unitario: 35.00, subtotal: 35.00 }
+      { id_pedido: 3, id_producto: 5, cantidad: 1, precio_unitario: 85.00, subtotal: 85.00 }, // Tiramisú
+      { id_pedido: 3, id_producto: 6, cantidad: 1, precio_unitario: 35.00, subtotal: 35.00 } // Café Mediano
     ]);
     console.log(`✓ ${detalles.length} detalles de pedidos creados.`);
 

@@ -27,19 +27,14 @@ const Producto = sequelize.define('Producto', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  precio: {
-    type: DataTypes.DECIMAL(10, 2),
+  id_precio_default: {
+    type: DataTypes.INTEGER,
     allowNull: true,
-    comment: 'Precio base opcional. Se recomienda usar tabla precio_productos para variantes',
-    validate: {
-      isDecimal: {
-        msg: 'El precio debe ser un número válido'
-      },
-      min: {
-        args: [0],
-        msg: 'El precio debe ser mayor o igual a 0'
-      }
-    }
+    references: {
+      model: 'precio_productos',
+      key: 'id_precio'
+    },
+    comment: 'Precio por defecto del producto. Todos los productos deben tener al menos un precio en precio_productos'
   },
   id_categoria: {
     type: DataTypes.INTEGER,
@@ -80,6 +75,9 @@ const Producto = sequelize.define('Producto', {
     },
     {
       fields: ['nombre']
+    },
+    {
+      fields: ['id_precio_default']
     }
   ]
 });
@@ -98,6 +96,12 @@ CategoriaProducto.hasMany(Producto, {
 Producto.hasMany(PrecioProducto, {
   foreignKey: 'id_producto',
   as: 'precios'
+});
+
+Producto.belongsTo(PrecioProducto, {
+  foreignKey: 'id_precio_default',
+  as: 'precio_default',
+  constraints: false
 });
 
 PrecioProducto.belongsTo(Producto, {

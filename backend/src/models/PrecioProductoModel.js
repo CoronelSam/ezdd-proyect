@@ -54,6 +54,12 @@ const PrecioProducto = sequelize.define('PrecioProducto', {
       }
     }
   },
+  es_default: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    comment: 'Indica si este es el precio por defecto del producto'
+  },
   activo: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -73,6 +79,12 @@ const PrecioProducto = sequelize.define('PrecioProducto', {
     },
     {
       fields: ['id_producto', 'activo']
+    },
+    {
+      fields: ['es_default']
+    },
+    {
+      fields: ['id_producto', 'es_default']
     }
   ]
 });

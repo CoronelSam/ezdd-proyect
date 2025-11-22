@@ -13,16 +13,6 @@ const validacionCrear = [
     .optional()
     .trim(),
   
-  body('precio')
-    .notEmpty().withMessage('El precio es requerido')
-    .isDecimal({ decimal_digits: '0,2' }).withMessage('El precio debe ser un número válido')
-    .custom((value) => {
-      if (parseFloat(value) < 0) {
-        throw new Error('El precio debe ser mayor o igual a 0');
-      }
-      return true;
-    }),
-  
   body('id_categoria')
     .notEmpty().withMessage('La categoría es requerida')
     .isInt({ min: 1 }).withMessage('La categoría debe ser un número válido'),
@@ -46,16 +36,6 @@ const validacionActualizar = [
     .optional()
     .trim(),
   
-  body('precio')
-    .optional()
-    .isDecimal({ decimal_digits: '0,2' }).withMessage('El precio debe ser un número válido')
-    .custom((value) => {
-      if (parseFloat(value) < 0) {
-        throw new Error('El precio debe ser mayor o igual a 0');
-      }
-      return true;
-    }),
-  
   body('id_categoria')
     .optional()
     .isInt({ min: 1 }).withMessage('La categoría debe ser un número válido'),
@@ -68,21 +48,6 @@ const validacionActualizar = [
   body('activo')
     .optional()
     .isBoolean().withMessage('El campo activo debe ser un booleano')
-];
-
-const validacionActualizarPrecio = [
-  param('id')
-    .isInt({ min: 1 }).withMessage('ID inválido'),
-  
-  body('precio')
-    .notEmpty().withMessage('El precio es requerido')
-    .isDecimal({ decimal_digits: '0,2' }).withMessage('El precio debe ser un número válido')
-    .custom((value) => {
-      if (parseFloat(value) < 0) {
-        throw new Error('El precio debe ser mayor o igual a 0');
-      }
-      return true;
-    })
 ];
 
 const validacionId = [
@@ -103,7 +68,6 @@ router.get('/estadisticas', ProductoController.obtenerEstadisticas);
 router.get('/categoria/:idCategoria', validacionIdCategoria, ProductoController.obtenerPorCategoria);
 router.get('/:id', validacionId, ProductoController.obtenerPorId);
 router.put('/:id', validacionActualizar, ProductoController.actualizar);
-router.patch('/:id/precio', validacionActualizarPrecio, ProductoController.actualizarPrecio);
 router.patch('/:id/reactivar', validacionId, ProductoController.reactivar);
 router.delete('/:id', validacionId, ProductoController.eliminar);
 router.delete('/:id/permanente', validacionId, ProductoController.eliminarPermanente);
