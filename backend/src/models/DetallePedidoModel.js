@@ -28,6 +28,16 @@ const DetallePedido = sequelize.define('DetallePedido', {
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT'
   },
+  id_precio: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'precio_productos',
+      key: 'id_precio'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
+  },
   cantidad: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -97,6 +107,12 @@ DetallePedido.associate = (models) => {
   DetallePedido.belongsTo(models.Producto, {
     foreignKey: 'id_producto',
     as: 'producto'
+  });
+
+  // Un detalle pertenece a un precio de producto
+  DetallePedido.belongsTo(models.PrecioProducto, {
+    foreignKey: 'id_precio',
+    as: 'precioProducto'
   });
 };
 

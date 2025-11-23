@@ -3,6 +3,7 @@ const DetallePedido = require('../models/DetallePedidoModel');
 const Cliente = require('../models/ClienteModel');
 const Empleado = require('../models/EmpleadoModel');
 const Producto = require('../models/ProductoModel');
+const PrecioProducto = require('../models/PrecioProductoModel');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -51,12 +52,23 @@ class PedidoService {
           throw new Error(`El producto ${producto.nombre} no está activo`);
         }
 
-        // Usar el precio del detalle o el del producto
-        const precioUnitario = detalle.precio_unitario || parseFloat(producto.precio || 0);
+        // Validar precio si se proporciona
+        let precioUnitario = detalle.precio_unitario;
+        if (detalle.id_precio) {
+          const precioProducto = await PrecioProducto.findByPk(detalle.id_precio);
+          if (!precioProducto || precioProducto.id_producto !== detalle.id_producto) {
+            throw new Error(`Precio no válido para el producto ${producto.nombre}`);
+          }
+          precioUnitario = parseFloat(precioProducto.precio);
+        } else if (!precioUnitario) {
+          precioUnitario = parseFloat(producto.precio || 0);
+        }
+
         const subtotal = precioUnitario * detalle.cantidad;
         
         detallesValidados.push({
           id_producto: detalle.id_producto,
+          id_precio: detalle.id_precio || null,
           cantidad: detalle.cantidad,
           precio_unitario: precioUnitario,
           subtotal: subtotal,
@@ -143,6 +155,11 @@ class PedidoService {
                 model: Producto,
                 as: 'producto',
                 attributes: ['id_producto', 'nombre', 'descripcion']
+              },
+              {
+                model: PrecioProducto,
+                as: 'precioProducto',
+                attributes: ['id_precio', 'nombre_presentacion', 'precio']
               }
             ]
           }
@@ -178,6 +195,11 @@ class PedidoService {
                 model: Producto,
                 as: 'producto',
                 attributes: ['id_producto', 'nombre', 'descripcion', 'precio']
+              },
+              {
+                model: PrecioProducto,
+                as: 'precioProducto',
+                attributes: ['id_precio', 'nombre_presentacion', 'precio']
               }
             ]
           }

@@ -26,6 +26,40 @@ require('./models/PedidoModel');
 require('./models/DetallePedidoModel');
 require('./models/MovimientoInventarioModel');
 
+// Inicializar asociaciones de modelos
+const Cliente = require('./models/ClienteModel');
+const Empleado = require('./models/EmpleadoModel');
+const CategoriaProducto = require('./models/CategoriaProductoModel');
+const Producto = require('./models/ProductoModel');
+const PrecioProducto = require('./models/PrecioProductoModel');
+const Ingrediente = require('./models/IngredienteModel');
+const Receta = require('./models/RecetaModel');
+const Inventario = require('./models/InventarioModel');
+const Pedido = require('./models/PedidoModel');
+const DetallePedido = require('./models/DetallePedidoModel');
+const MovimientoInventario = require('./models/MovimientoInventarioModel');
+
+const models = {
+  Cliente,
+  Empleado,
+  CategoriaProducto,
+  Producto,
+  PrecioProducto,
+  Ingrediente,
+  Receta,
+  Inventario,
+  Pedido,
+  DetallePedido,
+  MovimientoInventario
+};
+
+// Llamar a todas las asociaciones
+Object.keys(models).forEach(modelName => {
+  if (models[modelName].associate) {
+    models[modelName].associate(models);
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
