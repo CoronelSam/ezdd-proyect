@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const bcrypt = require('bcryptjs');
 
 const Cliente = sequelize.define('Cliente', {
   id_cliente: {
@@ -78,6 +79,24 @@ const Cliente = sequelize.define('Cliente', {
     }
   ]
 });
+
+Cliente.beforeCreate(async (cliente) => {
+  if (cliente.clave) {
+    const salt = await bcrypt.genSalt(10);
+    cliente.clave = await bcrypt.hash(cliente.clave, salt);
+  }
+});
+
+Cliente.beforeUpdate(async (cliente) => {
+  if (cliente.changed('clave')) {
+    const salt = await bcrypt.genSalt(10);
+    cliente.clave = await bcrypt.hash(cliente.clave, salt);
+  }
+});
+
+Cliente.prototype.verificarClave = async function(claveIngresada) {
+  return await bcrypt.compare(claveIngresada, this.clave);
+};
 
 Cliente.associate = (models) => {
   Cliente.hasMany(models.Pedido, {

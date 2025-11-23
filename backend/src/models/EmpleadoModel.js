@@ -117,6 +117,12 @@ Empleado.associate = (models) => {
     foreignKey: 'id_empleado',
     as: 'movimientos_inventario'
   });
+  
+  Empleado.hasOne(models.UsuarioSistema, {
+    foreignKey: 'empleado_id',
+    as: 'usuario_sistema',
+    onDelete: 'CASCADE'
+  });
 };
 
 module.exports = Empleado;

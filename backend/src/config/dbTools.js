@@ -10,6 +10,7 @@ const Inventario = require('../models/InventarioModel');
 const Pedido = require('../models/PedidoModel');
 const DetallePedido = require('../models/DetallePedidoModel');
 const MovimientoInventario = require('../models/MovimientoInventarioModel');
+const UsuarioSistema = require('../models/UsuarioSistemaModel');
 
 const createTables = async () => {
   try {
@@ -30,6 +31,7 @@ const createTables = async () => {
     console.log('  - pedidos');
     console.log('  - detalle_pedidos');
     console.log('  - movimientos_inventario');
+    console.log('  - usuarios_sistema');
 
     return true;
   } catch (error) {
@@ -132,9 +134,54 @@ const seedDatabase = async () => {
     const empleados = await Empleado.bulkCreate([
       { nombre: 'Juan Pérez', email: 'juan@restaurant.com', telefono: '555-0101', puesto: 'Gerente', salario: 15000.00, activo: true },
       { nombre: 'María García', email: 'maria@restaurant.com', telefono: '555-0102', puesto: 'Chef', salario: 12000.00, activo: true },
-      { nombre: 'Carlos López', email: 'carlos@restaurant.com', telefono: '555-0103', puesto: 'Mesero', salario: 8000.00, activo: true }
+      { nombre: 'Carlos López', email: 'carlos@restaurant.com', telefono: '555-0103', puesto: 'Mesero', salario: 8000.00, activo: true },
+      { nombre: 'Ana Rodríguez', email: 'ana@restaurant.com', telefono: '555-0104', puesto: 'Cajero', salario: 8500.00, activo: true },
+      { nombre: 'Pedro Martínez', email: 'pedro@restaurant.com', telefono: '555-0105', puesto: 'Cocinero', salario: 10000.00, activo: true }
     ]);
     console.log(`✓ ${empleados.length} empleados creados.`);
+
+    // Crear usuarios del sistema
+    // Las contraseñas se hashearán automáticamente con bcrypt mediante los hooks del modelo
+    const usuarios = await UsuarioSistema.bulkCreate([
+      { 
+        empleado_id: empleados[0].id_empleado, 
+        username: 'admin', 
+        password_hash: 'password123', 
+        rol: 'admin',
+        activo: true 
+      },
+      { 
+        empleado_id: empleados[1].id_empleado, 
+        username: 'maria.chef', 
+        password_hash: 'password123', 
+        rol: 'cocinero',
+        activo: true 
+      },
+      { 
+        empleado_id: empleados[2].id_empleado, 
+        username: 'carlos.mesero', 
+        password_hash: 'password123', 
+        rol: 'mesero',
+        activo: true 
+      },
+      { 
+        empleado_id: empleados[3].id_empleado, 
+        username: 'ana.cajero', 
+        password_hash: 'password123', 
+        rol: 'cajero',
+        activo: true 
+      },
+      { 
+        empleado_id: empleados[4].id_empleado, 
+        username: 'pedro.cocinero', 
+        password_hash: 'password123', 
+        rol: 'cocinero',
+        activo: true 
+      }
+    ], { 
+      individualHooks: true
+    });
+    console.log(`✓ ${usuarios.length} usuarios del sistema creados.`);
 
     // Crear ingredientes
     const ingredientes = await Ingrediente.bulkCreate([
@@ -195,10 +242,13 @@ const seedDatabase = async () => {
     console.log(`✓ ${inventarios.length} inventarios creados.`);
 
     // Crear clientes de prueba
+    // Las contraseñas se hashearán automáticamente con bcrypt mediante los hooks del modelo
     const clientes = await Cliente.bulkCreate([
       { nombre: 'Ana Martínez', email: 'ana@email.com', telefono: '555-1234', clave: 'password123', activo: true },
       { nombre: 'Luis Torres', email: 'luis@email.com', telefono: '555-5678', clave: 'password123', activo: true }
-    ]);
+    ], { 
+      individualHooks: true // Necesario para ejecutar los hooks de hasheo
+    });
     console.log(`✓ ${clientes.length} clientes creados.`);
 
     // Crear pedidos de prueba

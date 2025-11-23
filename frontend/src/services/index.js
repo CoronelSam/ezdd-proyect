@@ -8,6 +8,7 @@ export { default as inventariosService } from './inventarios.service';
 
 // servicios complementarios
 export { default as empleadosService } from './empleados.service';
+export { default as usuariosService } from './usuarios.service';
 export { default as categoriasService } from './categorias.service';
 export { default as ingredientesService } from './ingredientes.service';
 export { default as recetasService } from './recetas.service';
