@@ -1,7 +1,15 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const AdminLayout = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { usuario, logout } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     const navItems = [
         {
@@ -83,6 +91,23 @@ const AdminLayout = () => {
 
                         {/* Right Section */}
                         <div className="flex items-center gap-4">
+                            {usuario && (
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right hidden sm:block">
+                                        <p className="text-sm font-medium text-gray-900">{usuario.nombre}</p>
+                                        <p className="text-xs text-gray-500">{usuario.puesto || 'Administrador'}</p>
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span className="hidden sm:inline">Cerrar Sesión</span>
+                                    </button>
+                                </div>
+                            )}
                             <Link
                                 to="/"
                                 className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
@@ -90,7 +115,7 @@ const AdminLayout = () => {
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
-                                <span className="text-sm font-medium">Volver a Inicio</span>
+                                <span className="text-sm font-medium hidden md:inline">Volver a Inicio</span>
                             </Link>
                         </div>
                     </div>

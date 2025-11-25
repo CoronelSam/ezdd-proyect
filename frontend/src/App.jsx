@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { AuthProvider } from './context/AuthContext'
 import { CarritoProvider } from './context/CarritoContext'
 import './index.css'
 
@@ -6,6 +7,7 @@ import './index.css'
 import AdminLayout from './components/AdminLayout'
 import Carrito from './components/Carrito'
 import Navbar from './components/Navbar'
+import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute'
 
 // Pages - Client
 import Contacto from './pages/client/Contacto'
@@ -21,52 +23,82 @@ import GestionInventario from './pages/admin/GestionInventario'
 import GestionPedidos from './pages/admin/GestionPedidos'
 import GestionProductos from './pages/admin/GestionProductos'
 
+// Pages - Auth
+import Login from './pages/auth/Login'
+import Registro from './pages/auth/Registro'
+
 function App() {
   return (
     <Router>
-      <CarritoProvider>
-        <Routes>
-          {/* Client Routes with Navbar */}
-          <Route path="/" element={
-            <div className="min-h-screen">
-              <Navbar />
-              <Carrito />
-              <Inicio />
-            </div>
-          } />
-          <Route path="/menu" element={
-            <div className="min-h-screen">
-              <Navbar />
-              <Carrito />
-              <ProductosCliente />
-            </div>
-          } />
-          <Route path="/mis-pedidos" element={
-            <div className="min-h-screen">
-              <Navbar />
-              <Carrito />
-              <MisPedidos />
-            </div>
-          } />
-          <Route path="/contacto" element={
-            <div className="min-h-screen">
-              <Navbar />
-              <Carrito />
-              <Contacto />
-            </div>
-          } />
-          
-          {/* Admin Routes with AdminLayout */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="pedidos" element={<GestionPedidos />} />
-            <Route path="productos" element={<GestionProductos />} />
-            <Route path="categorias" element={<GestionCategorias />} />
-            <Route path="inventario" element={<GestionInventario />} />
-            <Route path="clientes" element={<GestionClientes />} />
-          </Route>
-        </Routes>
-      </CarritoProvider>
+      <AuthProvider>
+        <CarritoProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={
+              <div className="min-h-screen">
+                <Navbar />
+                <Carrito />
+                <Inicio />
+              </div>
+            } />
+
+            {/* Auth Routes */}
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/registro" element={
+              <PublicRoute>
+                <Registro />
+              </PublicRoute>
+            } />
+
+            {/* Client Protected Routes */}
+            <Route path="/menu" element={
+              <ProtectedRoute>
+                <div className="min-h-screen">
+                  <Navbar />
+                  <Carrito />
+                  <ProductosCliente />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/mis-pedidos" element={
+              <ProtectedRoute>
+                <div className="min-h-screen">
+                  <Navbar />
+                  <Carrito />
+                  <MisPedidos />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/contacto" element={
+              <ProtectedRoute>
+                <div className="min-h-screen">
+                  <Navbar />
+                  <Carrito />
+                  <Contacto />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin Protected Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="pedidos" element={<GestionPedidos />} />
+              <Route path="productos" element={<GestionProductos />} />
+              <Route path="categorias" element={<GestionCategorias />} />
+              <Route path="inventario" element={<GestionInventario />} />
+              <Route path="clientes" element={<GestionClientes />} />
+            </Route>
+          </Routes>
+        </CarritoProvider>
+      </AuthProvider>
     </Router>
   )
 }

@@ -1,10 +1,18 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { useCarrito } from '../hooks/useCarrito';
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const { toggleCarrito, calcularCantidadTotal } = useCarrito();
+    const { usuario, logout } = useAuth();
     const cantidadTotal = calcularCantidadTotal();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     const isActive = (path) => {
         return location.pathname === path;
@@ -50,21 +58,46 @@ const Navbar = () => {
                         ))}
                     </div>
 
-                    {/* Cart Button */}
-                    <button
-                        onClick={toggleCarrito}
-                        className="relative px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2 shadow-lg"
-                    >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                        </svg>
-                        <span className="hidden sm:inline">Carrito</span>
-                        {cantidadTotal > 0 && (
-                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
-                                {cantidadTotal}
-                            </span>
+                    {/* Right Section */}
+                    <div className="flex items-center gap-3">
+                        {/* Cart Button */}
+                        <button
+                            onClick={toggleCarrito}
+                            className="relative px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2 shadow-lg"
+                        >
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                            </svg>
+                            <span className="hidden sm:inline">Carrito</span>
+                            {cantidadTotal > 0 && (
+                                <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                                    {cantidadTotal}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* User Menu */}
+                        {usuario ? (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600 hidden sm:inline">
+                                    Hola, {usuario.nombre}
+                                </span>
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                >
+                                    Salir
+                                </button>
+                            </div>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Iniciar Sesión
+                            </Link>
                         )}
-                    </button>
+                    </div>
                 </div>
 
                 {/* Mobile Navigation */}

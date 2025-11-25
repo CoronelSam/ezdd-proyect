@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 const Inicio = () => {
+    const { estaAutenticado } = useAuth();
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
             {/* Hero Section */}
@@ -38,21 +40,43 @@ const Inicio = () => {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Link
-                                to="/menu"
-                                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-lg font-semibold rounded-full hover:from-orange-600 hover:to-red-700 transition transform hover:scale-105 shadow-lg flex items-center gap-2"
-                            >
-                                <span>Ver Menú</span>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                                </svg>
-                            </Link>
-                            <Link
-                                to="/mis-pedidos"
-                                className="px-8 py-4 bg-white text-gray-800 text-lg font-semibold rounded-full hover:bg-gray-50 transition transform hover:scale-105 shadow-lg border-2 border-gray-200"
-                            >
-                                Ver Mis Pedidos
-                            </Link>
+                            {estaAutenticado ? (
+                                <>
+                                    <Link
+                                        to="/menu"
+                                        className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-lg font-semibold rounded-full hover:from-orange-600 hover:to-red-700 transition transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                    >
+                                        <span>Ver Menú</span>
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </Link>
+                                    <Link
+                                        to="/mis-pedidos"
+                                        className="px-8 py-4 bg-white text-gray-800 text-lg font-semibold rounded-full hover:bg-gray-50 transition transform hover:scale-105 shadow-lg border-2 border-gray-200"
+                                    >
+                                        Ver Mis Pedidos
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/registro"
+                                        className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white text-lg font-semibold rounded-full hover:from-orange-600 hover:to-red-700 transition transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                    >
+                                        <span>Registrarse</span>
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                                        </svg>
+                                    </Link>
+                                    <Link
+                                        to="/login"
+                                        className="px-8 py-4 bg-white text-gray-800 text-lg font-semibold rounded-full hover:bg-gray-50 transition transform hover:scale-105 shadow-lg border-2 border-gray-200"
+                                    >
+                                        Iniciar Sesión
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
