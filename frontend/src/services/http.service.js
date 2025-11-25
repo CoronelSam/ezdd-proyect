@@ -9,7 +9,6 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use(
     (config) => {
-        // Si tienes autenticación, puedes agregar el token aquí
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;

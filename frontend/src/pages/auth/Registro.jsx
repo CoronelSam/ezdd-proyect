@@ -68,10 +68,21 @@ const Registro = () => {
 
             const response = await authService.registrarCliente(datos);
 
-            if (response.success) {
-                login(response.data);
-                localStorage.setItem('id_cliente', response.data.id_cliente);
+            if (response.mensaje && response.cliente) {
+                const userData = {
+                    tipo: 'cliente',
+                    id_cliente: response.cliente.id_cliente,
+                    nombre: response.cliente.nombre,
+                    email: response.cliente.email,
+                    telefono: response.cliente.telefono,
+                    activo: response.cliente.activo
+                };
+                
+                login(userData);
+                localStorage.setItem('id_cliente', response.cliente.id_cliente);
                 navigate('/menu');
+            } else {
+                setError('Error al crear la cuenta');
             }
         } catch (error) {
             setError(error.response?.data?.error || 'Error al registrar usuario');

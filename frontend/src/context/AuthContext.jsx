@@ -17,7 +17,10 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setUsuario(null);
         localStorage.removeItem('usuario');
+        localStorage.removeItem('token');
         localStorage.removeItem('id_cliente');
+        localStorage.removeItem('usuario_id');
+        localStorage.removeItem('id_empleado');
         localStorage.removeItem('carrito');
     };
 

@@ -29,25 +29,35 @@ const Login = () => {
 
         try {
             let response;
+            
             if (tipoUsuario === 'cliente') {
+                // Login de cliente con email y clave
                 response = await authService.loginCliente(formData.email, formData.clave);
             } else {
+                // Login de empleado con username y password
+                // Para empleados, el email ingresado será tratado como username
                 response = await authService.loginEmpleado(formData.email, formData.clave);
             }
 
             if (response.success) {
+                // Guardar usuario en contexto y localStorage
                 login(response.data);
-                
-                // Guardar id_cliente si es cliente
+
                 if (response.data.tipo === 'cliente') {
                     localStorage.setItem('id_cliente', response.data.id_cliente);
                     navigate('/menu');
                 } else {
+                    // Para empleados, redirigir según su rol
+                    localStorage.setItem('usuario_id', response.data.usuario_id);
+                    localStorage.setItem('id_empleado', response.data.id_empleado);
                     navigate('/admin/dashboard');
                 }
+            } else {
+                setError(response.error || 'Error al iniciar sesión');
             }
         } catch (error) {
-            setError(error.response?.data?.error || 'Error al iniciar sesión');
+            console.error('Error en login:', error);
+            setError(error.response?.data?.error || error.message || 'Error al iniciar sesión');
         } finally {
             setCargando(false);
         }
@@ -105,16 +115,16 @@ const Login = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Email
+                                {tipoUsuario === 'cliente' ? 'Email' : 'Usuario'}
                             </label>
                             <input
-                                type="email"
+                                type={tipoUsuario === 'cliente' ? 'email' : 'text'}
                                 name="email"
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="tu@email.com"
+                                placeholder={tipoUsuario === 'cliente' ? 'tu@email.com' : 'usuario'}
                             />
                         </div>
 

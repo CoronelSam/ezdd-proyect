@@ -242,12 +242,11 @@ const seedDatabase = async () => {
     console.log(`✓ ${inventarios.length} inventarios creados.`);
 
     // Crear clientes de prueba
-    // Las contraseñas se hashearán automáticamente con bcrypt mediante los hooks del modelo
     const clientes = await Cliente.bulkCreate([
       { nombre: 'Ana Martínez', email: 'ana@email.com', telefono: '555-1234', clave: 'password123', activo: true },
       { nombre: 'Luis Torres', email: 'luis@email.com', telefono: '555-5678', clave: 'password123', activo: true }
     ], { 
-      individualHooks: true // Necesario para ejecutar los hooks de hasheo
+      individualHooks: true
     });
     console.log(`✓ ${clientes.length} clientes creados.`);
 
