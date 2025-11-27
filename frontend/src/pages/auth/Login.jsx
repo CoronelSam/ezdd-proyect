@@ -31,24 +31,19 @@ const Login = () => {
             let response;
             
             if (tipoUsuario === 'cliente') {
-                // Login de cliente con email y clave
                 response = await authService.loginCliente(formData.email, formData.clave);
             } else {
-                // Login de empleado con username y password
-                // Para empleados, el email ingresado será tratado como username
                 response = await authService.loginEmpleado(formData.email, formData.clave);
             }
 
             if (response.success) {
-                // Guardar usuario en contexto y localStorage
                 login(response.data);
 
                 if (response.data.tipo === 'cliente') {
                     localStorage.setItem('id_cliente', response.data.id_cliente);
-                    navigate('/menu');
+                    navigate('/');
                 } else {
-                    // Para empleados, redirigir según su rol
-                    localStorage.setItem('usuario_id', response.data.usuario_id);
+                    // Para empleados, guardar su ID
                     localStorage.setItem('id_empleado', response.data.id_empleado);
                     navigate('/admin/dashboard');
                 }
@@ -68,9 +63,9 @@ const Login = () => {
             <div className="max-w-md w-full">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="inline-block w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mb-4">
+                    <div className="inline-block w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                         <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900">Iniciar Sesión</h1>

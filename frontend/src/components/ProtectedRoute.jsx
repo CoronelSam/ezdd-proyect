@@ -17,7 +17,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
     }
 
     if (requireAdmin && !esAdmin()) {
-        return <Navigate to="/menu" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return children;
@@ -30,7 +30,7 @@ export const PublicRoute = ({ children }) => {
         if (esAdmin()) {
             return <Navigate to="/admin/dashboard" replace />;
         }
-        return <Navigate to="/menu" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return children;

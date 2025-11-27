@@ -24,6 +24,13 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('carrito');
     };
 
+    // Actualizar datos del usuario en el contexto
+    const actualizarUsuario = (nuevosDatos) => {
+        const usuarioActualizado = { ...usuario, ...nuevosDatos };
+        setUsuario(usuarioActualizado);
+        localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+    };
+
     const esAdmin = () => {
         return usuario?.tipo === 'empleado';
     };
@@ -37,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         cargando,
         login,
         logout,
+        actualizarUsuario,
         esAdmin,
         esCliente,
         estaAutenticado: !!usuario

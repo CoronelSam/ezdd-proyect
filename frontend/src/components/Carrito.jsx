@@ -102,16 +102,26 @@ const Carrito = () => {
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-            <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-50/95 via-white/95 to-purple-50/95 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+            <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-100">
                 {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        Mi Pedido ({items.length})
-                    </h2>
+                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-5 flex justify-between items-center rounded-t-3xl">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white/20 p-2 rounded-xl">
+                            <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold text-white">
+                                Mi Pedido
+                            </h2>
+                            <p className="text-blue-100 text-sm">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
+                        </div>
+                    </div>
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="text-gray-400 hover:text-gray-600 transition"
+                        className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition"
                     >
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -122,12 +132,20 @@ const Carrito = () => {
                 {/* Contenido */}
                 <div className="flex-1 overflow-y-auto p-6">
                     {items.length === 0 ? (
-                        <div className="text-center py-12">
-                            <svg className="mx-auto h-24 w-24 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Tu carrito está vacío</h3>
-                            <p className="text-neutral-500">Agrega productos para realizar tu pedido</p>
+                        <div className="text-center py-16">
+                            <div className="mx-auto h-32 w-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+                                <svg className="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3">Tu carrito está vacío</h3>
+                            <p className="text-gray-500 mb-6">¡Explora nuestro menú y agrega tus platillos favoritos!</p>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition transform hover:scale-105"
+                            >
+                                Ver Menú
+                            </button>
                         </div>
                     ) : (
                         <>
@@ -135,7 +153,7 @@ const Carrito = () => {
                                 {items.map((item) => (
                                     <div
                                         key={`${item.producto.id_producto}-${item.precio.id_precio}`}
-                                        className="bg-neutral-50 rounded-lg p-4"
+                                        className="bg-gradient-to-br from-white to-blue-50/30 rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition"
                                     >
                                         <div className="flex justify-between items-start mb-3">
                                             <div className="flex-1">
@@ -234,26 +252,37 @@ const Carrito = () => {
 
                 {/* Footer */}
                 {items.length > 0 && (
-                    <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-lg font-semibold text-gray-800">Total:</span>
-                            <span className="text-2xl font-bold text-blue-600">
-                                {formatearPrecio(calcularTotal())}
-                            </span>
+                    <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-blue-50/50 border-t-2 border-blue-100 px-6 py-5 rounded-b-3xl">
+                        <div className="flex justify-between items-center mb-5">
+                            <span className="text-lg font-semibold text-gray-700">Total a pagar:</span>
+                            <div className="text-right">
+                                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    {formatearPrecio(calcularTotal())}
+                                </span>
+                                <p className="text-sm text-gray-500 mt-1">Incluye todos los productos</p>
+                            </div>
                         </div>
                         <div className="flex gap-3">
                             <button
                                 onClick={limpiarCarrito}
-                                className="flex-1 px-6 py-3 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition font-medium"
+                                className="flex-1 px-6 py-3.5 border-2 border-red-400 text-red-600 rounded-xl hover:bg-red-50 transition font-semibold"
                             >
                                 Vaciar carrito
                             </button>
                             <button
                                 onClick={handleRealizarPedido}
                                 disabled={procesando}
-                                className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                             >
-                                {procesando ? 'Procesando...' : 'Realizar Pedido'}
+                                {procesando ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                        </svg>
+                                        Procesando...
+                                    </span>
+                                ) : 'Realizar Pedido'}
                             </button>
                         </div>
                     </div>

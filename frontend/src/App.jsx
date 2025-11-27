@@ -19,8 +19,10 @@ import ProductosCliente from './pages/client/ProductosCliente'
 import Dashboard from './pages/admin/Dashboard'
 import GestionCategorias from './pages/admin/GestionCategorias'
 import GestionClientes from './pages/admin/GestionClientes'
+import GestionEmpleados from './pages/admin/GestionEmpleados'
 import GestionInventario from './pages/admin/GestionInventario'
 import GestionPedidos from './pages/admin/GestionPedidos'
+import GestionPrecios from './pages/admin/GestionPrecios'
 import GestionProductos from './pages/admin/GestionProductos'
 
 // Pages - Auth
@@ -94,7 +96,9 @@ function App() {
               <Route path="productos" element={<GestionProductos />} />
               <Route path="categorias" element={<GestionCategorias />} />
               <Route path="inventario" element={<GestionInventario />} />
+              <Route path="precios" element={<GestionPrecios />} />
               <Route path="clientes" element={<GestionClientes />} />
+              <Route path="empleados" element={<GestionEmpleados />} />
             </Route>
           </Routes>
         </CarritoProvider>
