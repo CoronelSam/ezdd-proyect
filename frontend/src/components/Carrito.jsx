@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useCarrito } from '../hooks/useCarrito';
 import { useAuth } from '../hooks/useAuth';
+import { useCarrito } from '../hooks/useCarrito';
 import { pedidosService } from '../services';
 
 const Carrito = () => {
