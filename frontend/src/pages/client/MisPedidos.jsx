@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import pedidosService from '../../services/pedidos.service';
 
 const MisPedidos = () => {
+    const { usuario } = useAuth();
     const [pedidos, setPedidos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,12 +14,23 @@ const MisPedidos = () => {
         // Auto-actualizar cada 30 segundos
         const interval = setInterval(cargarPedidos, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [usuario]);
 
     const cargarPedidos = async () => {
         try {
             setLoading(true);
-            const data = await pedidosService.getAll();
+            
+            // Si el usuario no está autenticado o no tiene id_cliente, no cargar pedidos
+            if (!usuario || !usuario.id_cliente) {
+                setPedidos([]);
+                setError('Debes iniciar sesión para ver tus pedidos');
+                setLoading(false);
+                return;
+            }
+            
+            // Cargar solo los pedidos del cliente autenticado
+            const data = await pedidosService.getByCliente(usuario.id_cliente);
+            
             // Ordenar por fecha más reciente
             const pedidosOrdenados = data.sort((a, b) => 
                 new Date(b.fecha_pedido) - new Date(a.fecha_pedido)
