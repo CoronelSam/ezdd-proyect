@@ -12,9 +12,7 @@ const GestionInventario = () => {
 
     const [formData, setFormData] = useState({
         id_ingrediente: '',
-        cantidad: '',
-        unidad_medida: 'kg',
-        fecha_ultima_actualizacion: new Date().toISOString().split('T')[0]
+        cantidad_actual: ''
     });
 
     useEffect(() => {
@@ -41,17 +39,13 @@ const GestionInventario = () => {
             setInventarioSeleccionado(inventario);
             setFormData({
                 id_ingrediente: inventario.id_ingrediente,
-                cantidad: inventario.cantidad,
-                unidad_medida: inventario.unidad_medida,
-                fecha_ultima_actualizacion: new Date().toISOString().split('T')[0]
+                cantidad_actual: inventario.cantidad_actual
             });
         } else {
             setInventarioSeleccionado(null);
             setFormData({
                 id_ingrediente: '',
-                cantidad: '',
-                unidad_medida: 'kg',
-                fecha_ultima_actualizacion: new Date().toISOString().split('T')[0]
+                cantidad_actual: ''
             });
         }
         setModalAbierto(true);
@@ -90,21 +84,23 @@ const GestionInventario = () => {
         }
     };
 
-    const getNivelStock = (cantidad) => {
-        const num = parseFloat(cantidad);
-        if (num <= 10) return 'bajo';
-        if (num <= 50) return 'medio';
+    const getNivelStock = (cantidadActual, stockMinimo) => {
+        const num = parseFloat(cantidadActual);
+        const minimo = parseFloat(stockMinimo || 10);
+        if (num < minimo) return 'bajo';
+        if (num < minimo * 3) return 'medio';
         return 'alto';
     };
 
     const inventariosFiltrados = inventarios.filter(inv => {
-        const ingrediente = ingredientes.find(i => i.id_ingrediente === inv.id_ingrediente);
+        const ingrediente = inv.ingrediente || ingredientes.find(i => i.id_ingrediente === inv.id_ingrediente);
         const nombreIngrediente = ingrediente?.nombre || '';
+        const unidadMedida = ingrediente?.unidad_medida || '';
         
         const matchBusqueda = nombreIngrediente.toLowerCase().includes(busqueda.toLowerCase()) ||
-                            inv.unidad_medida.toLowerCase().includes(busqueda.toLowerCase());
+                            unidadMedida.toLowerCase().includes(busqueda.toLowerCase());
         
-        const nivelStock = getNivelStock(inv.cantidad);
+        const nivelStock = getNivelStock(inv.cantidad_actual, ingrediente?.stock_minimo);
         const matchStock = filtroStock === 'todos' || nivelStock === filtroStock;
         
         return matchBusqueda && matchStock;
@@ -158,7 +154,10 @@ const GestionInventario = () => {
                             <div>
                                 <p className="text-sm text-gray-600">Stock Bajo</p>
                                 <p className="text-3xl font-bold text-red-600 mt-1">
-                                    {inventarios.filter(i => getNivelStock(i.cantidad) === 'bajo').length}
+                                    {inventarios.filter(i => {
+                                        const ingrediente = i.ingrediente || ingredientes.find(ing => ing.id_ingrediente === i.id_ingrediente);
+                                        return getNivelStock(i.cantidad_actual, ingrediente?.stock_minimo) === 'bajo';
+                                    }).length}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -173,7 +172,10 @@ const GestionInventario = () => {
                             <div>
                                 <p className="text-sm text-gray-600">Stock Alto</p>
                                 <p className="text-3xl font-bold text-green-600 mt-1">
-                                    {inventarios.filter(i => getNivelStock(i.cantidad) === 'alto').length}
+                                    {inventarios.filter(i => {
+                                        const ingrediente = i.ingrediente || ingredientes.find(ing => ing.id_ingrediente === i.id_ingrediente);
+                                        return getNivelStock(i.cantidad_actual, ingrediente?.stock_minimo) === 'alto';
+                                    }).length}
                                 </p>
                             </div>
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -235,8 +237,8 @@ const GestionInventario = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {inventariosFiltrados.map((inventario) => {
-                                const ingrediente = ingredientes.find(i => i.id_ingrediente === inventario.id_ingrediente);
-                                const nivelStock = getNivelStock(inventario.cantidad);
+                                const ingrediente = inventario.ingrediente || ingredientes.find(i => i.id_ingrediente === inventario.id_ingrediente);
+                                const nivelStock = getNivelStock(inventario.cantidad_actual, ingrediente?.stock_minimo);
                                 
                                 return (
                                     <tr key={inventario.id_inventario} className="hover:bg-gray-50">
@@ -247,12 +249,12 @@ const GestionInventario = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 font-medium">
-                                                {parseFloat(inventario.cantidad).toFixed(2)}
+                                                {parseFloat(inventario.cantidad_actual).toFixed(2)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-500">
-                                                {inventario.unidad_medida}
+                                                {ingrediente?.unidad_medida || 'N/A'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -267,7 +269,7 @@ const GestionInventario = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(inventario.fecha_ultima_actualizacion).toLocaleDateString()}
+                                            {new Date(inventario.fecha_actualizacion).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button
@@ -328,33 +330,22 @@ const GestionInventario = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Cantidad *
+                                        Cantidad Actual *
                                     </label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         required
-                                        value={formData.cantidad}
-                                        onChange={(e) => setFormData({...formData, cantidad: e.target.value})}
+                                        value={formData.cantidad_actual}
+                                        onChange={(e) => setFormData({...formData, cantidad_actual: e.target.value})}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ingrese la cantidad actual"
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Unidad de Medida *
-                                    </label>
-                                    <select
-                                        required
-                                        value={formData.unidad_medida}
-                                        onChange={(e) => setFormData({...formData, unidad_medida: e.target.value})}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    >
-                                        <option value="kg">Kilogramos (kg)</option>
-                                        <option value="g">Gramos (g)</option>
-                                        <option value="l">Litros (l)</option>
-                                        <option value="ml">Mililitros (ml)</option>
-                                        <option value="unidad">Unidades</option>
-                                    </select>
+                                    {formData.id_ingrediente && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Unidad: {ingredientes.find(i => i.id_ingrediente === parseInt(formData.id_ingrediente))?.unidad_medida || 'N/A'}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                             <div className="mt-6 flex gap-3">

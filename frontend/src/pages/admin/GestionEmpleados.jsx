@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { authService, empleadosService } from '../../services';
 
 const GestionEmpleados = () => {
+    const { usuario, actualizarUsuario } = useAuth();
     const [empleados, setEmpleados] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -43,8 +45,22 @@ const GestionEmpleados = () => {
 
         try {
             if (empleadoSeleccionado) {
-                await empleadosService.update(empleadoSeleccionado.id_empleado, formData);
+                const empleadoActualizado = await empleadosService.update(empleadoSeleccionado.id_empleado, formData);
                 setExito('Empleado actualizado exitosamente');
+                
+                // Si el empleado actualizado es el usuario logueado, actualizar el contexto
+                if (usuario?.tipo === 'empleado' && usuario?.id_empleado === empleadoSeleccionado.id_empleado) {
+                    actualizarUsuario({
+                        nombre: empleadoActualizado.nombre,
+                        email: empleadoActualizado.email,
+                        empleado: {
+                            ...usuario.empleado,
+                            nombre: empleadoActualizado.nombre,
+                            email: empleadoActualizado.email,
+                            puesto: empleadoActualizado.puesto
+                        }
+                    });
+                }
             } else {
                 await authService.registrarEmpleado(formData);
                 setExito('Empleado creado exitosamente con usuario de acceso');

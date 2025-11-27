@@ -69,14 +69,20 @@ const Registro = () => {
             const response = await authService.registrarCliente(datos);
 
             if (response.success && response.data) {
+                // Registrar sesión en el contexto
                 login(response.data);
+                
+                // Guardar ID del cliente
                 localStorage.setItem('id_cliente', response.data.id_cliente);
-                navigate('/');
+                
+                // Redirigir al menú
+                navigate('/menu');
             } else {
                 setError(response.error || 'Error al crear la cuenta');
             }
         } catch (error) {
-            setError(error.response?.data?.error || 'Error al registrar usuario');
+            console.error('Error inesperado en registro:', error);
+            setError('Error inesperado al registrar usuario');
         } finally {
             setCargando(false);
         }

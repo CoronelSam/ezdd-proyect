@@ -1,22 +1,17 @@
 const Cliente = require('../models/ClienteModel');
+const { Pedido } = require('../models');
 const bcrypt = require('bcryptjs');
 
 class ClienteService {
   
   async crearCliente(clienteData) {
     try {
-      // Encriptar la contraseña antes de guardar
-      const salt = await bcrypt.genSalt(10);
-      const claveEncriptada = await bcrypt.hash(clienteData.clave, salt);
-
       const nuevoCliente = await Cliente.create({
         ...clienteData,
-        clave: claveEncriptada,
         fecha_registro: new Date(),
         activo: true
       });
 
-      // Retornar el cliente sin la contraseña
       const clienteSinClave = nuevoCliente.toJSON();
       delete clienteSinClave.clave;
       
@@ -37,6 +32,13 @@ class ClienteService {
       const clientes = await Cliente.findAll({
         where,
         attributes: { exclude: ['clave'] },
+        include: [
+          {
+            model: Pedido,
+            as: 'pedidos',
+            attributes: ['id_pedido', 'estado', 'total', 'fecha_pedido']
+          }
+        ],
         order: [['fecha_registro', 'DESC']]
       });
 
@@ -49,7 +51,14 @@ class ClienteService {
   async obtenerClientePorId(id) {
     try {
       const cliente = await Cliente.findByPk(id, {
-        attributes: { exclude: ['clave'] }
+        attributes: { exclude: ['clave'] },
+        include: [
+          {
+            model: Pedido,
+            as: 'pedidos',
+            attributes: ['id_pedido', 'estado', 'total', 'fecha_pedido']
+          }
+        ]
       });
 
       if (!cliente) {
@@ -82,12 +91,7 @@ class ClienteService {
         throw new Error('Cliente no encontrado');
       }
 
-      // Si se actualiza la contraseña, encriptarla
-      if (datosActualizados.clave) {
-        const salt = await bcrypt.genSalt(10);
-        datosActualizados.clave = await bcrypt.hash(datosActualizados.clave, salt);
-      }
-
+      // El hook beforeUpdate se encargará de hashear la contraseña si cambió
       await cliente.update(datosActualizados);
 
       // Retornar el cliente sin la contraseña
@@ -132,6 +136,46 @@ class ClienteService {
     }
   }
 
+  async cambiarClave(id, claveActual, claveNueva) {
+    try {
+      const cliente = await Cliente.findByPk(id);
+
+      if (!cliente) {
+        throw new Error('Cliente no encontrado');
+      }
+
+      // Verificar la contraseña actual
+      const claveValida = await bcrypt.compare(claveActual, cliente.clave);
+
+      if (!claveValida) {
+        throw new Error('La contraseña actual es incorrecta');
+      }
+
+      // Actualizar con la nueva contraseña (el hook beforeUpdate la hasheará automáticamente)
+      await cliente.update({ clave: claveNueva });
+
+      return { mensaje: 'Contraseña actualizada exitosamente' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async reactivarCliente(id) {
+    try {
+      const cliente = await Cliente.findByPk(id);
+
+      if (!cliente) {
+        throw new Error('Cliente no encontrado');
+      }
+
+      await cliente.update({ activo: true });
+
+      return { mensaje: 'Cliente reactivado exitosamente' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async verificarCredenciales(email, clave) {
     try {
       const cliente = await this.obtenerClientePorEmail(email);
@@ -155,6 +199,22 @@ class ClienteService {
       delete clienteSinClave.clave;
 
       return clienteSinClave;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async obtenerEstadisticas() {
+    try {
+      const total = await Cliente.count();
+      const activos = await Cliente.count({ where: { activo: true } });
+      const inactivos = await Cliente.count({ where: { activo: false } });
+
+      return {
+        total_clientes: total,
+        clientes_activos: activos,
+        clientes_inactivos: inactivos
+      };
     } catch (error) {
       throw error;
     }

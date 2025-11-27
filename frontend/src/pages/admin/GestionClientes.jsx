@@ -108,7 +108,7 @@ const GestionClientes = () => {
                                 <p className="text-3xl font-bold text-green-600 mt-1">
                                     {clientes.filter(c => {
                                         const hoy = new Date().toDateString();
-                                        return new Date(c.createdAt).toDateString() === hoy;
+                                        return new Date(c.fecha_registro).toDateString() === hoy;
                                     }).length}
                                 </p>
                             </div>
@@ -200,7 +200,7 @@ const GestionClientes = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(cliente.createdAt).toLocaleDateString()}
+                                        {new Date(cliente.fecha_registro).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button

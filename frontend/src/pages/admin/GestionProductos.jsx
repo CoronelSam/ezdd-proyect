@@ -15,7 +15,7 @@ const GestionProductos = () => {
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: '',
-        id_categoria_producto: '',
+        id_categoria: '',
         imagen_url: '',
         activo: true
     });
@@ -45,7 +45,7 @@ const GestionProductos = () => {
             setFormData({
                 nombre: producto.nombre,
                 descripcion: producto.descripcion || '',
-                id_categoria_producto: producto.id_categoria_producto,
+                id_categoria: producto.id_categoria,
                 imagen_url: producto.imagen_url || '',
                 activo: producto.activo
             });
@@ -54,7 +54,7 @@ const GestionProductos = () => {
             setFormData({
                 nombre: '',
                 descripcion: '',
-                id_categoria_producto: '',
+                id_categoria: '',
                 imagen_url: '',
                 activo: true
             });
@@ -107,7 +107,7 @@ const GestionProductos = () => {
     };
 
     const productosFiltrados = productos.filter(p => {
-        const matchCategoria = filtroCategoria === 'todas' || p.id_categoria_producto === parseInt(filtroCategoria);
+        const matchCategoria = filtroCategoria === 'todas' || p.id_categoria === parseInt(filtroCategoria);
         const matchBusqueda = p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
                             (p.descripcion && p.descripcion.toLowerCase().includes(busqueda.toLowerCase()));
         return matchCategoria && matchBusqueda;
@@ -158,7 +158,7 @@ const GestionProductos = () => {
                         >
                             <option value="todas">Todas las categorías</option>
                             {categorias.map(cat => (
-                                <option key={cat.id_categoria_producto} value={cat.id_categoria_producto}>
+                                <option key={cat.id_categoria} value={cat.id_categoria}>
                                     {cat.nombre}
                                 </option>
                             ))}
@@ -188,7 +188,7 @@ const GestionProductos = () => {
                                     {producto.descripcion || 'Sin descripción'}
                                 </p>
                                 <p className="text-xs text-gray-500 mb-4">
-                                    Categoría: {categorias.find(c => c.id_categoria_producto === producto.id_categoria_producto)?.nombre || 'N/A'}
+                                    Categoría: {producto.categoria?.nombre || categorias.find(c => c.id_categoria === producto.id_categoria)?.nombre || 'N/A'}
                                 </p>
                                 <div className="flex gap-2">
                                     <button
@@ -258,13 +258,13 @@ const GestionProductos = () => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
                                     <select
                                         required
-                                        value={formData.id_categoria_producto}
-                                        onChange={(e) => setFormData({...formData, id_categoria_producto: e.target.value})}
+                                        value={formData.id_categoria}
+                                        onChange={(e) => setFormData({...formData, id_categoria: e.target.value})}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     >
                                         <option value="">Seleccionar categoría</option>
                                         {categorias.map(cat => (
-                                            <option key={cat.id_categoria_producto} value={cat.id_categoria_producto}>
+                                            <option key={cat.id_categoria} value={cat.id_categoria}>
                                                 {cat.nombre}
                                             </option>
                                         ))}

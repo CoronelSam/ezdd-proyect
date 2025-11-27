@@ -204,6 +204,76 @@ class ClienteController {
     }
   }
 
+  async cambiarClave(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ 
+          error: 'Errores de validación', 
+          detalles: errors.array() 
+        });
+      }
+
+      const { id } = req.params;
+      const { clave_actual, clave_nueva } = req.body;
+
+      const resultado = await ClienteService.cambiarClave(id, clave_actual, clave_nueva);
+      
+      res.status(200).json(resultado);
+    } catch (error) {
+      console.error('Error al cambiar contraseña:', error);
+      
+      if (error.message === 'Cliente no encontrado') {
+        return res.status(404).json({ error: 'Cliente no encontrado' });
+      }
+
+      if (error.message === 'La contraseña actual es incorrecta') {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al cambiar la contraseña',
+        mensaje: error.message 
+      });
+    }
+  }
+
+  async reactivar(req, res) {
+    try {
+      const { id } = req.params;
+      const resultado = await ClienteService.reactivarCliente(id);
+      
+      res.status(200).json(resultado);
+    } catch (error) {
+      console.error('Error al reactivar cliente:', error);
+      
+      if (error.message === 'Cliente no encontrado') {
+        return res.status(404).json({ error: 'Cliente no encontrado' });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al reactivar el cliente',
+        mensaje: error.message 
+      });
+    }
+  }
+
+  async obtenerEstadisticas(req, res) {
+    try {
+      const estadisticas = await ClienteService.obtenerEstadisticas();
+      
+      res.status(200).json({
+        estadisticas
+      });
+    } catch (error) {
+      console.error('Error al obtener estadísticas:', error);
+      res.status(500).json({ 
+        error: 'Error al obtener las estadísticas',
+        mensaje: error.message 
+      });
+    }
+  }
+
   async login(req, res) {
     try {
       // Validar errores de express-validator

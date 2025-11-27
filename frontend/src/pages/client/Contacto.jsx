@@ -83,11 +83,14 @@ const Contacto = () => {
                 telefono: formPerfil.telefono
             });
             
+            // Extraer cliente del resultado
+            const clienteActualizado = resultado.cliente || resultado;
+            
             // Actualizar el contexto de autenticación con los nuevos datos
             actualizarUsuario({
-                nombre: resultado.cliente.nombre,
-                email: resultado.cliente.email,
-                telefono: resultado.cliente.telefono
+                nombre: clienteActualizado.nombre,
+                email: clienteActualizado.email,
+                telefono: clienteActualizado.telefono
             });
             
             setExito('Perfil actualizado exitosamente. Ahora puedes iniciar sesión con tu nuevo email.');
@@ -124,10 +127,7 @@ const Contacto = () => {
 
         try {
             const clienteId = localStorage.getItem('id_cliente');
-            await clientesService.update(clienteId, {
-                claveActual: formClave.claveActual,
-                clave: formClave.claveNueva
-            });
+            await clientesService.cambiarClave(clienteId, formClave.claveActual, formClave.claveNueva);
             
             setExito('Contraseña actualizada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.');
             setEditandoClave(false);
