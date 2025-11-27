@@ -335,7 +335,7 @@ function ProductosCliente() {
 
             {/* Modal de detalle del producto */}
             {productoSeleccionado && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={cerrarDetalleProducto}>
+                <div className="fixed inset-0 bg-gradient-to-br from-blue-900/40 via-purple-900/40 to-pink-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={cerrarDetalleProducto}>
                     <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         {/* Header del modal */}
                         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
