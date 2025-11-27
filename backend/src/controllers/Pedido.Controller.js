@@ -10,6 +10,21 @@ class PedidoController {
       }
 
       const pedido = await PedidoService.crearPedido(req.body);
+      
+      // Emitir evento de nuevo pedido a través de Socket.IO
+      if (req.io) {
+        // Notificar a admin
+        req.io.to('admin').emit('pedido:nuevo', pedido);
+        
+        // Notificar al cliente si existe
+        if (pedido.id_cliente) {
+          req.io.to(`cliente:${pedido.id_cliente}`).emit('pedido:nuevo', pedido);
+        }
+        
+        // Emitir a la sala del pedido
+        req.io.to(`pedido:${pedido.id_pedido}`).emit('pedido:actualizado', pedido);
+      }
+      
       res.status(201).json({
         mensaje: 'Pedido creado exitosamente',
         pedido
@@ -101,11 +116,38 @@ class PedidoController {
       }
 
       const pedido = await PedidoService.actualizarEstado(req.params.id, req.body.estado);
+      
+      // Emitir evento de cambio de estado (con manejo de errores)
+      try {
+        if (req.io) {
+          const evento = {
+            id_pedido: pedido.id_pedido,
+            estado: pedido.estado,
+            pedido: pedido
+          };
+          
+          // Notificar a admin
+          req.io.to('admin').emit('pedido:estado', evento);
+          
+          // Notificar al cliente si existe
+          if (pedido.id_cliente) {
+            req.io.to(`cliente:${pedido.id_cliente}`).emit('pedido:estado', evento);
+          }
+          
+          // Emitir a la sala del pedido
+          req.io.to(`pedido:${pedido.id_pedido}`).emit('pedido:actualizado', pedido);
+        }
+      } catch (socketError) {
+        console.error('Error al emitir evento Socket.IO:', socketError);
+        // No fallar la petición si Socket.IO falla
+      }
+      
       res.status(200).json({
         mensaje: 'Estado del pedido actualizado exitosamente',
         pedido
       });
     } catch (error) {
+      console.error('Error en actualizarEstado:', error);
       if (error.message === 'Pedido no encontrado') {
         return res.status(404).json({ mensaje: error.message });
       }
@@ -114,7 +156,8 @@ class PedidoController {
       }
       res.status(500).json({
         mensaje: 'Error al actualizar el estado del pedido',
-        error: error.message
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -148,6 +191,24 @@ class PedidoController {
   async cancelar(req, res) {
     try {
       const pedido = await PedidoService.cancelarPedido(req.params.id);
+      
+      // Emitir evento de cancelación
+      if (req.io) {
+        const evento = {
+          id_pedido: pedido.id_pedido,
+          estado: 'cancelado',
+          pedido: pedido
+        };
+        
+        req.io.to('admin').emit('pedido:cancelado', evento);
+        
+        if (pedido.id_cliente) {
+          req.io.to(`cliente:${pedido.id_cliente}`).emit('pedido:cancelado', evento);
+        }
+        
+        req.io.to(`pedido:${pedido.id_pedido}`).emit('pedido:actualizado', pedido);
+      }
+      
       res.status(200).json({
         mensaje: 'Pedido cancelado exitosamente',
         pedido

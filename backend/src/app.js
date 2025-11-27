@@ -1,7 +1,9 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const sequelize = require('./config/database');
+const { Server } = require('socket.io');
 
 const clienteRoutes = require('./routes/cliente.Routes');
 const empleadoRoutes = require('./routes/empleado.Routes');
@@ -19,9 +21,28 @@ const usuarioSistemaRoutes = require('./routes/usuarioSistema.Routes');
 require('./models');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// Configurar Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+  }
+});
+
+// Middleware para adjuntar io a las peticiones
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -107,6 +128,38 @@ const syncDatabase = async () => {
   }
 };
 
+// Configurar eventos de Socket.IO
+io.on('connection', (socket) => {
+  console.log('Cliente conectado:', socket.id);
+
+  // Admin se une a la sala 'admin'
+  socket.on('join_admin', () => {
+    socket.join('admin');
+    console.log(`Socket ${socket.id} se unió a la sala admin`);
+  });
+
+  // Cliente se une a su sala personal
+  socket.on('join_cliente', (idCliente) => {
+    if (idCliente) {
+      socket.join(`cliente:${idCliente}`);
+      console.log(`Socket ${socket.id} se unió a la sala cliente:${idCliente}`);
+    }
+  });
+
+  // Unirse a la sala de un pedido específico
+  socket.on('join_pedido', (idPedido) => {
+    if (idPedido) {
+      socket.join(`pedido:${idPedido}`);
+      console.log(`Socket ${socket.id} se unió a la sala pedido:${idPedido}`);
+    }
+  });
+
+  // Desconexión
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado:', socket.id);
+  });
+});
+
 const startServer = async () => {
   try {
     const dbConnected = await syncDatabase();
@@ -116,8 +169,9 @@ const startServer = async () => {
       process.exit(1);
     }
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`\nServidor corriendo en http://localhost:${PORT}`);
+      console.log(`Socket.IO habilitado en http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);
@@ -140,4 +194,4 @@ process.on('SIGINT', async () => {
 
 startServer();
 
-module.exports = app;
+module.exports = { app, server, io };

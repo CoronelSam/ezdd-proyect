@@ -1,10 +1,52 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { joinAdmin, onNuevoPedido, onEstadoPedido, off } from '../services/socket.service';
 
 const AdminLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { usuario, logout } = useAuth();
+    const [notificacionPedido, setNotificacionPedido] = useState(null);
+
+    useEffect(() => {
+        // Conectar al socket y unirse a la sala admin
+        joinAdmin();
+
+        // Escuchar nuevos pedidos
+        const handleNuevoPedido = (pedido) => {
+            console.log('🆕 Nuevo pedido recibido:', pedido);
+            setNotificacionPedido({
+                tipo: 'nuevo',
+                mensaje: `Nuevo pedido #${pedido.id_pedido}`,
+                pedido
+            });
+            
+            // Ocultar notificación después de 5 segundos
+            setTimeout(() => setNotificacionPedido(null), 5000);
+        };
+
+        // Escuchar cambios de estado
+        const handleEstadoPedido = ({ id_pedido, estado }) => {
+            console.log('📝 Estado actualizado:', id_pedido, estado);
+            setNotificacionPedido({
+                tipo: 'estado',
+                mensaje: `Pedido #${id_pedido}: ${estado}`,
+                id_pedido,
+                estado
+            });
+            
+            setTimeout(() => setNotificacionPedido(null), 5000);
+        };
+
+        onNuevoPedido(handleNuevoPedido);
+        onEstadoPedido(handleEstadoPedido);
+
+        return () => {
+            off('pedido:nuevo', handleNuevoPedido);
+            off('pedido:estado', handleEstadoPedido);
+        };
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -90,6 +132,32 @@ const AdminLayout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* Notificación de pedidos */}
+            {notificacionPedido && (
+                <div className="fixed top-20 right-4 z-50 animate-slide-in">
+                    <div className={`rounded-lg shadow-lg p-4 max-w-sm ${
+                        notificacionPedido.tipo === 'nuevo' 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-blue-500 text-white'
+                    }`}>
+                        <div className="flex items-center gap-3">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <div>
+                                <p className="font-semibold">{notificacionPedido.mensaje}</p>
+                                <button 
+                                    onClick={() => setNotificacionPedido(null)}
+                                    className="text-xs underline mt-1"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Top Navigation Bar */}
             <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -131,7 +199,7 @@ const AdminLayout = () => {
                 </div>
             </nav>
 
-            <div className="pt-16 flex">
+            <div className="pt-16 flex bg-gray-50 min-h-screen">
                 {/* Sidebar */}
                 <aside className="w-64 bg-white shadow-lg h-[calc(100vh-4rem)] fixed left-0 top-16 overflow-y-auto">
                     <nav className="p-4 space-y-2">
@@ -153,7 +221,7 @@ const AdminLayout = () => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="ml-64 flex-1">
+                <main className="ml-64 flex-1 bg-gray-50">
                     <Outlet />
                 </main>
             </div>

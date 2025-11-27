@@ -37,7 +37,7 @@ function ProductosCliente() {
         // Filtrar por categoría
         if (categoriaSeleccionada !== 'todas') {
             resultado = resultado.filter(
-                producto => producto.id_categoria_producto === parseInt(categoriaSeleccionada)
+                producto => producto.id_categoria === parseInt(categoriaSeleccionada)
             );
         }
 
@@ -234,7 +234,7 @@ function ProductosCliente() {
                             >
                                 <option value="todas">Todas las categorías</option>
                                 {categorias.map((categoria) => (
-                                    <option key={categoria.id_categoria_producto} value={categoria.id_categoria_producto}>
+                                    <option key={categoria.id_categoria} value={categoria.id_categoria}>
                                         {categoria.nombre}
                                     </option>
                                 ))}

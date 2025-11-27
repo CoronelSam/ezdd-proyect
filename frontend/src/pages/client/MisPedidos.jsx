@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import pedidosService from '../../services/pedidos.service';
+import { joinCliente, onNuevoPedido, onEstadoPedido, onPedidoCancelado, off } from '../../services/socket.service';
 
 const MisPedidos = () => {
     const { usuario } = useAuth();
@@ -8,13 +9,72 @@ const MisPedidos = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filtroEstado, setFiltroEstado] = useState('todos');
+    const [notificacion, setNotificacion] = useState(null);
 
     useEffect(() => {
         cargarPedidos();
-        // Auto-actualizar cada 30 segundos
-        const interval = setInterval(cargarPedidos, 30000);
-        return () => clearInterval(interval);
     }, [usuario]);
+
+    // Socket.IO para actualizaciones en tiempo real
+    useEffect(() => {
+        if (!usuario?.id_cliente) return;
+
+        // Unirse a la sala del cliente
+        joinCliente(usuario.id_cliente);
+
+        // Manejar nuevo pedido
+        const handleNuevoPedido = (pedido) => {
+            if (pedido.id_cliente === usuario.id_cliente) {
+                console.log('🆕 Nuevo pedido recibido:', pedido);
+                setPedidos((prev) => [pedido, ...prev]);
+                setNotificacion('¡Pedido creado exitosamente!');
+                setTimeout(() => setNotificacion(null), 3000);
+            }
+        };
+
+        // Manejar cambio de estado
+        const handleEstadoPedido = ({ id_pedido, estado, pedido }) => {
+            console.log('📝 Estado actualizado:', id_pedido, estado);
+            setPedidos((prev) =>
+                prev.map((p) => 
+                    p.id_pedido === id_pedido 
+                        ? { ...p, estado, ...(pedido && { ...pedido }) }
+                        : p
+                )
+            );
+            const mensajes = {
+                pendiente: 'Tu pedido está pendiente',
+                en_preparacion: '👨‍🍳 Tu pedido está en preparación',
+                listo: '✅ ¡Tu pedido está listo!',
+                entregado: '🎉 Pedido entregado',
+                cancelado: '❌ Pedido cancelado'
+            };
+            setNotificacion(mensajes[estado] || `Estado actualizado: ${estado}`);
+            setTimeout(() => setNotificacion(null), 5000);
+        };
+
+        // Manejar cancelación
+        const handlePedidoCancelado = ({ id_pedido }) => {
+            console.log('❌ Pedido cancelado:', id_pedido);
+            setPedidos((prev) =>
+                prev.map((p) => 
+                    p.id_pedido === id_pedido ? { ...p, estado: 'cancelado' } : p
+                )
+            );
+            setNotificacion('❌ Tu pedido ha sido cancelado');
+            setTimeout(() => setNotificacion(null), 5000);
+        };
+
+        onNuevoPedido(handleNuevoPedido);
+        onEstadoPedido(handleEstadoPedido);
+        onPedidoCancelado(handlePedidoCancelado);
+
+        return () => {
+            off('pedido:nuevo', handleNuevoPedido);
+            off('pedido:estado', handleEstadoPedido);
+            off('pedido:cancelado', handlePedidoCancelado);
+        };
+    }, [usuario?.id_cliente]);
 
     const cargarPedidos = async () => {
         try {
@@ -131,6 +191,20 @@ const MisPedidos = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 py-12">
             <div className="max-w-6xl mx-auto px-4">
+                {/* Notificación */}
+                {notificacion && (
+                    <div className="fixed top-4 right-4 z-50 animate-slide-in">
+                        <div className="bg-blue-500 text-white rounded-lg shadow-lg p-4 max-w-sm">
+                            <div className="flex items-center gap-3">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p className="font-medium">{notificacion}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-800 mb-2">Mis Pedidos</h1>

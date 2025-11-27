@@ -15,3 +15,6 @@ export { default as preciosService } from './precios.service';
 export { default as recetasService } from './recetas.service';
 export { default as usuariosService } from './usuarios.service';
 
+// servicios de tiempo real
+export { default as socketService } from './socket.service';
+

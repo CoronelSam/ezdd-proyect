@@ -18,6 +18,10 @@ export const pedidosService = {
         return await http.patch(`${API_CONFIG.ENDPOINTS.PEDIDOS}/${id}/estado`, { estado });
     },
 
+    actualizarEstado: async (id, body) => {
+        return await http.patch(`${API_CONFIG.ENDPOINTS.PEDIDOS}/${id}/estado`, body);
+    },
+
     update: async (id, pedidoData) => {
         return await http.put(`${API_CONFIG.ENDPOINTS.PEDIDOS}/${id}`, pedidoData);
     },

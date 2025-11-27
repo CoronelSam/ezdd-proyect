@@ -50,35 +50,18 @@ const Carrito = () => {
                 id_cliente: usuario?.id_cliente || null // Asociar pedido al cliente autenticado
             };
 
-            console.log('📤 Enviando pedido:', pedidoData);
-            console.log('👤 Usuario actual:', usuario);
-
             const response = await pedidosService.create(pedidoData);
-            
-            console.log('✅ Respuesta completa del servidor:', response);
-            console.log('📦 Objeto pedido:', response.pedido);
-            console.log('🆔 ID del pedido:', response.pedido?.id_pedido);
             
             // La respuesta tiene la estructura { mensaje, pedido }
             if (response && response.pedido && response.pedido.id_pedido) {
-                console.log('✅ Pedido creado exitosamente, limpiando carrito...');
                 setPedidoCreado(response.pedido);
                 limpiarCarrito();
                 setNotasGenerales('');
             } else {
-                console.error('❌ Estructura de respuesta inesperada:', response);
-                console.error('❌ response.pedido existe?', !!response.pedido);
-                console.error('❌ response.pedido.id_pedido existe?', response.pedido?.id_pedido);
                 throw new Error('Respuesta inválida del servidor');
             }
         } catch (err) {
-            console.error('❌ Error al crear pedido:', err);
-            if (err.response) {
-                console.error('Detalles de la respuesta de error:', err.response.data);
-                console.error('Status:', err.response.status);
-            } else {
-                console.error('Error sin respuesta del servidor:', err.message);
-            }
+            console.error('Error al crear pedido:', err);
             setError('No se pudo crear el pedido. Por favor, intenta de nuevo.');
         } finally {
             setProcesando(false);

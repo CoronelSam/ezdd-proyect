@@ -97,9 +97,50 @@ class PedidoService {
 
       await transaction.commit();
 
-      return await this.obtenerPedidoPorId(pedido.id_pedido);
+      // Obtener el pedido completo DESPUÉS del commit
+      try {
+        const pedidoCompleto = await this.obtenerPedidoPorId(pedido.id_pedido);
+        return pedidoCompleto;
+      } catch (error) {
+        // Si falla obtener el pedido completo, construir manualmente con los datos disponibles
+        console.error('Error al obtener pedido completo, construyendo respuesta manual:', error.message);
+        
+        // Obtener datos relacionados de forma segura
+        const cliente = data.id_cliente ? await Cliente.findByPk(data.id_cliente, {
+          attributes: ['id_cliente', 'nombre', 'email', 'telefono']
+        }) : null;
+        
+        const detallesConProductos = await Promise.all(
+          detallesValidados.map(async (det) => {
+            const producto = await Producto.findByPk(det.id_producto, {
+              attributes: ['id_producto', 'nombre', 'descripcion']
+            });
+            const precioProducto = det.id_precio ? await PrecioProducto.findByPk(det.id_precio, {
+              attributes: ['id_precio', 'nombre_presentacion', 'precio']
+            }) : null;
+            
+            return {
+              ...det,
+              id_pedido: pedido.id_pedido,
+              producto: producto ? producto.toJSON() : null,
+              precioProducto: precioProducto ? precioProducto.toJSON() : null
+            };
+          })
+        );
+        
+        return {
+          ...pedido.toJSON(),
+          cliente: cliente ? cliente.toJSON() : null,
+          empleado: null,
+          detalles: detallesConProductos
+        };
+      }
     } catch (error) {
-      await transaction.rollback();
+      // Solo hacer rollback si la transacción no ha sido committeada
+      if (!transaction.finished) {
+        await transaction.rollback();
+      }
+      console.error('Error en crearPedido:', error);
       throw error;
     }
   }
@@ -180,26 +221,31 @@ class PedidoService {
           {
             model: Cliente,
             as: 'cliente',
-            attributes: ['id_cliente', 'nombre', 'email', 'telefono']
+            attributes: ['id_cliente', 'nombre', 'email', 'telefono'],
+            required: false
           },
           {
             model: Empleado,
             as: 'empleado',
-            attributes: ['id_empleado', 'nombre', 'puesto']
+            attributes: ['id_empleado', 'nombre', 'puesto'],
+            required: false
           },
           {
             model: DetallePedido,
             as: 'detalles',
+            required: false,
             include: [
               {
                 model: Producto,
                 as: 'producto',
-                attributes: ['id_producto', 'nombre', 'descripcion', 'precio']
+                attributes: ['id_producto', 'nombre', 'descripcion'],
+                required: false
               },
               {
                 model: PrecioProducto,
                 as: 'precioProducto',
-                attributes: ['id_precio', 'nombre_presentacion', 'precio']
+                attributes: ['id_precio', 'nombre_presentacion', 'precio'],
+                required: false
               }
             ]
           }
@@ -212,6 +258,7 @@ class PedidoService {
 
       return pedido;
     } catch (error) {
+      console.error('Error en obtenerPedidoPorId:', error);
       throw error;
     }
   }
@@ -231,8 +278,20 @@ class PedidoService {
 
       await pedido.update({ estado });
 
-      return await this.obtenerPedidoPorId(id);
+      // Devolver el pedido actualizado simple primero para debug
+      const pedidoActualizado = await Pedido.findByPk(id, {
+        include: [
+          {
+            model: Cliente,
+            as: 'cliente',
+            attributes: ['id_cliente', 'nombre', 'email']
+          }
+        ]
+      });
+
+      return pedidoActualizado;
     } catch (error) {
+      console.error('Error en actualizarEstado service:', error);
       throw error;
     }
   }
