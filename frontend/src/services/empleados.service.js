@@ -1,5 +1,5 @@
-import { http } from './http.service';
 import { API_CONFIG } from '../config/api';
+import { http } from './http.service';
 
 /**
  * Servicio para gestionar empleados

@@ -1,7 +1,7 @@
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { joinAdmin, onNuevoPedido, onEstadoPedido, off } from '../services/socket.service';
+import { joinAdmin, off, onEstadoPedido, onNuevoPedido } from '../services/socket.service';
 
 const AdminLayout = () => {
     const location = useLocation();
