@@ -115,24 +115,24 @@ const GestionProductos = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Gestión de Productos</h1>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Productos</h1>
                         <p className="text-gray-600 mt-1">Administra el menú del restaurante</p>
                     </div>
                     <button
                         onClick={() => abrirModal()}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -149,12 +149,12 @@ const GestionProductos = () => {
                             placeholder="Buscar producto..."
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
                         <select
                             value={filtroCategoria}
                             onChange={(e) => setFiltroCategoria(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         >
                             <option value="todas">Todas las categorías</option>
                             {categorias.map(cat => (
@@ -193,13 +193,13 @@ const GestionProductos = () => {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => abrirGestionPrecios(producto)}
-                                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
+                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition text-sm shadow-md"
                                     >
                                         Precios
                                     </button>
                                     <button
                                         onClick={() => abrirModal(producto)}
-                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition text-sm shadow-md"
                                     >
                                         Editar
                                     </button>
@@ -226,7 +226,7 @@ const GestionProductos = () => {
 
             {/* Modal Crear/Editar */}
             {modalAbierto && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -242,7 +242,7 @@ const GestionProductos = () => {
                                         required
                                         value={formData.nombre}
                                         onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -251,7 +251,7 @@ const GestionProductos = () => {
                                         value={formData.descripcion}
                                         onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
                                         rows="3"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -260,7 +260,7 @@ const GestionProductos = () => {
                                         required
                                         value={formData.id_categoria}
                                         onChange={(e) => setFormData({...formData, id_categoria: e.target.value})}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     >
                                         <option value="">Seleccionar categoría</option>
                                         {categorias.map(cat => (
@@ -276,7 +276,7 @@ const GestionProductos = () => {
                                         type="url"
                                         value={formData.imagen_url}
                                         onChange={(e) => setFormData({...formData, imagen_url: e.target.value})}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div className="flex items-center">
@@ -285,7 +285,7 @@ const GestionProductos = () => {
                                         id="activo"
                                         checked={formData.activo}
                                         onChange={(e) => setFormData({...formData, activo: e.target.checked})}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                                     />
                                     <label htmlFor="activo" className="ml-2 block text-sm text-gray-900">
                                         Producto activo
@@ -302,7 +302,7 @@ const GestionProductos = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     {productoSeleccionado ? 'Actualizar' : 'Crear'}
                                 </button>
@@ -314,7 +314,7 @@ const GestionProductos = () => {
 
             {/* Modal Gestión de Precios */}
             {modalPrecios && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                             <div>
@@ -341,7 +341,7 @@ const GestionProductos = () => {
                                             <p className="font-medium text-gray-900">{precio.nombre_presentacion}</p>
                                             <p className="text-sm text-gray-500">{precio.descripcion}</p>
                                         </div>
-                                        <p className="text-lg font-bold text-blue-600">
+                                        <p className="text-lg font-bold text-orange-600">
                                             L. {parseFloat(precio.precio).toFixed(2)}
                                         </p>
                                     </div>

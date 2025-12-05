@@ -169,18 +169,18 @@ const GestionPrecios = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Gestión de Precios</h1>
+                    <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Precios</h1>
                     <p className="text-gray-600 mt-2">Administra los precios de los productos</p>
                 </div>
 
@@ -204,7 +204,7 @@ const GestionPrecios = () => {
                     <select
                         value={productoSeleccionado?.id_producto || ''}
                         onChange={handleProductoChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
                         {productos.map(producto => (
                             <option key={producto.id_producto} value={producto.id_producto}>
@@ -216,7 +216,7 @@ const GestionPrecios = () => {
 
                 {/* Detalles del Producto */}
                 {productoSeleccionado && (
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-md p-6 mb-6">
+                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg shadow-md p-6 mb-6">
                         <div className="flex justify-between items-start">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -235,7 +235,7 @@ const GestionPrecios = () => {
                             </div>
                             <button
                                 onClick={abrirModalNuevo}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-orange-600 hover:to-red-700 flex items-center gap-2 shadow-lg"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -322,7 +322,7 @@ const GestionPrecios = () => {
 
             {/* Modal Agregar/Editar */}
             {modalAbierto && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
                         <div className="p-6 border-b border-gray-200">
                             <h3 className="text-xl font-bold text-gray-900">

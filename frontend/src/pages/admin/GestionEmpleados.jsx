@@ -14,6 +14,7 @@ const GestionEmpleados = () => {
         telefono: '',
         puesto: 'Mesero',
         salario: '',
+        activo: true,
         clave: ''
     });
     const [error, setError] = useState(null);
@@ -45,7 +46,12 @@ const GestionEmpleados = () => {
 
         try {
             if (empleadoSeleccionado) {
-                const empleadoActualizado = await empleadosService.update(empleadoSeleccionado.id_empleado, formData);
+                // Al editar, remover clave si está vacía
+                const dataToSend = { ...formData };
+                if (!dataToSend.clave) {
+                    delete dataToSend.clave;
+                }
+                const empleadoActualizado = await empleadosService.update(empleadoSeleccionado.id_empleado, dataToSend);
                 setExito('Empleado actualizado exitosamente');
                 
                 // Si el empleado actualizado es el usuario logueado, actualizar el contexto
@@ -87,6 +93,23 @@ const GestionEmpleados = () => {
         }
     };
 
+    const handleToggleEstado = async (empleado) => {
+        try {
+            if (empleado.activo) {
+                await empleadosService.desactivar(empleado.id_empleado);
+                setExito('Empleado desactivado exitosamente');
+            } else {
+                await empleadosService.reactivar(empleado.id_empleado);
+                setExito('Empleado reactivado exitosamente');
+            }
+            await cargarEmpleados();
+            setTimeout(() => setExito(null), 3000);
+        } catch (error) {
+            console.error('Error al cambiar estado del empleado:', error);
+            setError('Error al cambiar el estado del empleado');
+        }
+    };
+
     const abrirModalNuevo = () => {
         setEmpleadoSeleccionado(null);
         setFormData({
@@ -95,6 +118,7 @@ const GestionEmpleados = () => {
             telefono: '',
             puesto: 'Mesero',
             salario: '',
+            activo: true,
             clave: ''
         });
         setMostrarModal(true);
@@ -108,7 +132,7 @@ const GestionEmpleados = () => {
             telefono: empleado.telefono || '',
             puesto: empleado.puesto,
             salario: empleado.salario,
-            clave: '' // No mostramos la contraseña actual
+            activo: empleado.activo
         });
         setMostrarModal(true);
     };
@@ -128,24 +152,24 @@ const GestionEmpleados = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Gestión de Empleados</h1>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Empleados</h1>
                         <p className="text-gray-600 mt-1">Administra tu equipo de trabajo</p>
                     </div>
                     <button
                         onClick={abrirModalNuevo}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -242,18 +266,41 @@ const GestionEmpleados = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button
-                                                onClick={() => abrirModalEditar(empleado)}
-                                                className="text-blue-600 hover:text-blue-900 mr-4"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                onClick={() => handleEliminar(empleado.id_empleado)}
-                                                className="text-red-600 hover:text-red-900"
-                                            >
-                                                Eliminar
-                                            </button>
+                                            <div className="flex justify-end gap-3">
+                                                <button
+                                                    onClick={() => abrirModalEditar(empleado)}
+                                                    className="text-orange-600 hover:text-orange-900"
+                                                    title="Editar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleToggleEstado(empleado)}
+                                                    className={`${empleado.activo ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}`}
+                                                    title={empleado.activo ? 'Desactivar' : 'Reactivar'}
+                                                >
+                                                    {empleado.activo ? (
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEliminar(empleado.id_empleado)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                    title="Eliminar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -265,7 +312,7 @@ const GestionEmpleados = () => {
 
             {/* Modal Crear/Editar */}
             {mostrarModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6">
                             {empleadoSeleccionado ? 'Editar Empleado' : 'Nuevo Empleado'}
@@ -281,7 +328,7 @@ const GestionEmpleados = () => {
                                     required
                                     value={formData.nombre}
                                     onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
 
@@ -294,23 +341,24 @@ const GestionEmpleados = () => {
                                     required
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Contraseña {!empleadoSeleccionado && '*'}
-                                </label>
-                                <input
-                                    type="password"
-                                    required={!empleadoSeleccionado}
-                                    value={formData.clave}
-                                    onChange={(e) => setFormData({ ...formData, clave: e.target.value })}
-                                    placeholder={empleadoSeleccionado ? "Dejar en blanco para no cambiar" : ""}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
+                            {!empleadoSeleccionado && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Contraseña *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.clave}
+                                        onChange={(e) => setFormData({ ...formData, clave: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -320,7 +368,7 @@ const GestionEmpleados = () => {
                                     type="tel"
                                     value={formData.telefono}
                                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
 
@@ -332,7 +380,7 @@ const GestionEmpleados = () => {
                                     required
                                     value={formData.puesto}
                                     onChange={(e) => setFormData({ ...formData, puesto: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 >
                                     {puestos.map(puesto => (
                                         <option key={puesto} value={puesto}>{puesto}</option>
@@ -351,7 +399,7 @@ const GestionEmpleados = () => {
                                     min="0"
                                     value={formData.salario}
                                     onChange={(e) => setFormData({ ...formData, salario: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
 
@@ -365,7 +413,7 @@ const GestionEmpleados = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     {empleadoSeleccionado ? 'Actualizar' : 'Crear Empleado'}
                                 </button>

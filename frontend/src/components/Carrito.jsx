@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCarrito } from '../hooks/useCarrito';
 import { pedidosService } from '../services';
 
 const Carrito = () => {
+    const navigate = useNavigate();
     const {
         items,
         eliminarItem,
@@ -78,7 +80,7 @@ const Carrito = () => {
     // Modal de confirmación del pedido
     if (pedidoCreado) {
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                 <div className="bg-white rounded-2xl max-w-md w-full p-6">
                     <div className="text-center">
                         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
@@ -92,14 +94,14 @@ const Carrito = () => {
                         </p>
                         <div className="bg-neutral-50 rounded-lg p-4 mb-6">
                             <p className="text-sm text-neutral-500 mb-1">Total</p>
-                            <p className="text-2xl font-bold text-blue-600">
+                            <p className="text-2xl font-bold text-orange-600">
                                 {formatearPrecio(pedidoCreado.total)}
                             </p>
                             <p className="text-sm text-neutral-500 mt-2">Estado: {pedidoCreado.estado}</p>
                         </div>
                         <button
                             onClick={cerrarConfirmacion}
-                            className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
+                            className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition font-medium shadow-lg"
                         >
                             Continuar
                         </button>
@@ -110,10 +112,10 @@ const Carrito = () => {
     }
 
     return (
-        <div className="fixed inset-0 bg-gradient-to-br from-blue-50/95 via-white/95 to-purple-50/95 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-50/95 via-white/95 to-yellow-50/95 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
             <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-100">
                 {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-5 flex justify-between items-center rounded-t-3xl">
+                <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-red-600 px-6 py-5 flex justify-between items-center rounded-t-3xl">
                     <div className="flex items-center gap-3">
                         <div className="bg-white/20 p-2 rounded-xl">
                             <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,7 +126,7 @@ const Carrito = () => {
                             <h2 className="text-2xl font-bold text-white">
                                 Mi Pedido
                             </h2>
-                            <p className="text-blue-100 text-sm">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
+                            <p className="text-orange-100 text-sm">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
                         </div>
                     </div>
                     <button
@@ -141,16 +143,19 @@ const Carrito = () => {
                 <div className="flex-1 overflow-y-auto p-6">
                     {items.length === 0 ? (
                         <div className="text-center py-16">
-                            <div className="mx-auto h-32 w-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
-                                <svg className="h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="mx-auto h-32 w-32 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center mb-6">
+                                <svg className="h-16 w-16 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                 </svg>
                             </div>
                             <h3 className="text-2xl font-bold text-gray-800 mb-3">Tu carrito está vacío</h3>
                             <p className="text-gray-500 mb-6">¡Explora nuestro menú y agrega tus platillos favoritos!</p>
                             <button
-                                onClick={() => setIsOpen(false)}
-                                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition transform hover:scale-105"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    navigate('/menu');
+                                }}
+                                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl hover:from-orange-600 hover:to-red-700 hover:shadow-lg transition transform hover:scale-105"
                             >
                                 Ver Menú
                             </button>
@@ -161,13 +166,13 @@ const Carrito = () => {
                                 {items.map((item) => (
                                     <div
                                         key={`${item.producto.id_producto}-${item.precio.id_precio}`}
-                                        className="bg-gradient-to-br from-white to-blue-50/30 rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition"
+                                        className="bg-gradient-to-br from-white to-orange-50/30 rounded-2xl p-5 border border-orange-100 shadow-sm hover:shadow-md transition"
                                     >
                                         <div className="flex justify-between items-start mb-3">
                                             <div className="flex-1">
                                                 <h3 className="font-semibold text-gray-800">{item.producto.nombre}</h3>
                                                 <p className="text-sm text-neutral-600">{item.precio.nombre_presentacion}</p>
-                                                <p className="text-blue-600 font-medium mt-1">
+                                                <p className="text-orange-600 font-medium mt-1">
                                                     {formatearPrecio(item.precio.precio)}
                                                 </p>
                                             </div>
@@ -220,7 +225,7 @@ const Carrito = () => {
                                                 item.precio.id_precio,
                                                 e.target.value
                                             )}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                             rows="2"
                                         />
 
@@ -244,7 +249,7 @@ const Carrito = () => {
                                     placeholder="Ej: Sin cebolla, extra salsa, etc."
                                     value={notasGenerales}
                                     onChange={(e) => setNotasGenerales(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     rows="3"
                                 />
                             </div>
@@ -260,11 +265,11 @@ const Carrito = () => {
 
                 {/* Footer */}
                 {items.length > 0 && (
-                    <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-blue-50/50 border-t-2 border-blue-100 px-6 py-5 rounded-b-3xl">
+                    <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-orange-50/50 border-t-2 border-orange-100 px-6 py-5 rounded-b-3xl">
                         <div className="flex justify-between items-center mb-5">
                             <span className="text-lg font-semibold text-gray-700">Total a pagar:</span>
                             <div className="text-right">
-                                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                <span className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
                                     {formatearPrecio(calcularTotal())}
                                 </span>
                                 <p className="text-sm text-gray-500 mt-1">Incluye todos los productos</p>
@@ -280,7 +285,7 @@ const Carrito = () => {
                             <button
                                 onClick={handleRealizarPedido}
                                 disabled={procesando}
-                                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl hover:shadow-xl transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                             >
                                 {procesando ? (
                                     <span className="flex items-center justify-center gap-2">

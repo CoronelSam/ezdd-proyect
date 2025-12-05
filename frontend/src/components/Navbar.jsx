@@ -31,11 +31,11 @@ const Navbar = () => {
                 <div className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition">
-                        <div className="w-12 h-12 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
                             🍕
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-gray-800">Restaurante</h1>
+                            <h1 className="text-xl font-bold text-gray-800">El Sazón de Doris</h1>
                             <p className="text-xs text-gray-500">Sabor auténtico</p>
                         </div>
                     </Link>
@@ -63,7 +63,7 @@ const Navbar = () => {
                         {/* Cart Button */}
                         <button
                             onClick={toggleCarrito}
-                            className="relative px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2 shadow-lg"
+                            className="relative px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
                         >
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />

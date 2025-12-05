@@ -50,6 +50,11 @@ export const empleadosService = {
         return await http.delete(`${API_CONFIG.ENDPOINTS.EMPLEADOS}/${id}/permanente`);
     },
 
+    desactivar: async (id) => {
+        const response = await http.patch(`${API_CONFIG.ENDPOINTS.EMPLEADOS}/${id}/desactivar`);
+        return response.empleado;
+    },
+
     reactivar: async (id) => {
         const response = await http.patch(`${API_CONFIG.ENDPOINTS.EMPLEADOS}/${id}/reactivar`);
         return response.empleado;

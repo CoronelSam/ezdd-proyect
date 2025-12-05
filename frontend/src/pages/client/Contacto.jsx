@@ -149,23 +149,23 @@ const Contacto = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 py-12 px-4">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-block w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
-                        <span className="text-3xl font-bold text-white">
+                    <div className="inline-flex w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full items-center justify-center mb-4 shadow-lg">
+                        <span className="text-3xl font-bold text-white leading-none">
                             {cliente?.nombre?.charAt(0).toUpperCase()}
                         </span>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
+                    <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Mi Perfil</h1>
                     <p className="text-gray-600 mt-2">Administra tu información personal</p>
                 </div>
 
@@ -189,7 +189,7 @@ const Contacto = () => {
                             {!editandoPerfil && (
                                 <button
                                     onClick={() => setEditandoPerfil(true)}
-                                    className="text-blue-600 hover:text-blue-700 font-medium"
+                                    className="text-orange-600 hover:text-orange-700 font-medium"
                                 >
                                     Editar
                                 </button>
@@ -237,7 +237,7 @@ const Contacto = () => {
                                         required
                                         value={formPerfil.nombre}
                                         onChange={handlePerfilChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -250,7 +250,7 @@ const Contacto = () => {
                                         required
                                         value={formPerfil.email}
                                         onChange={handlePerfilChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -262,7 +262,7 @@ const Contacto = () => {
                                         name="telefono"
                                         value={formPerfil.telefono}
                                         onChange={handlePerfilChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div className="flex gap-3 pt-2">
@@ -283,7 +283,7 @@ const Contacto = () => {
                                     <button
                                         type="submit"
                                         disabled={guardando}
-                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 disabled:opacity-50 shadow-lg"
                                     >
                                         {guardando ? 'Guardando...' : 'Guardar'}
                                     </button>
@@ -299,7 +299,7 @@ const Contacto = () => {
                             {!editandoClave && (
                                 <button
                                     onClick={() => setEditandoClave(true)}
-                                    className="text-blue-600 hover:text-blue-700 font-medium"
+                                    className="text-orange-600 hover:text-orange-700 font-medium"
                                 >
                                     Cambiar Contraseña
                                 </button>
@@ -317,8 +317,8 @@ const Contacto = () => {
                                         <p className="text-sm text-gray-500">••••••••</p>
                                     </div>
                                 </div>
-                                <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg">
-                                    <p className="font-medium text-blue-900 mb-1">💡 Consejo de Seguridad</p>
+                                <div className="text-sm text-gray-600 bg-orange-50 p-4 rounded-lg">
+                                    <p className="font-medium text-orange-900 mb-1">💡 Consejo de Seguridad</p>
                                     <p>Usa una contraseña fuerte con al menos 6 caracteres que incluya letras y números.</p>
                                 </div>
                             </div>
@@ -334,7 +334,7 @@ const Contacto = () => {
                                         required
                                         value={formClave.claveActual}
                                         onChange={handleClaveChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                         placeholder="Ingresa tu contraseña actual"
                                     />
                                 </div>
@@ -349,7 +349,7 @@ const Contacto = () => {
                                         minLength="6"
                                         value={formClave.claveNueva}
                                         onChange={handleClaveChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                         placeholder="Mínimo 6 caracteres"
                                     />
                                 </div>
@@ -364,7 +364,7 @@ const Contacto = () => {
                                         minLength="6"
                                         value={formClave.claveConfirmar}
                                         onChange={handleClaveChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                         placeholder="Repite la nueva contraseña"
                                     />
                                 </div>
@@ -386,7 +386,7 @@ const Contacto = () => {
                                     <button
                                         type="submit"
                                         disabled={guardando}
-                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 disabled:opacity-50 shadow-lg"
                                     >
                                         {guardando ? 'Guardando...' : 'Cambiar Contraseña'}
                                     </button>

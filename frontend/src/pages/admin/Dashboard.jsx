@@ -79,18 +79,18 @@ const Dashboard = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
             {/* Header */}
             <div className="bg-white shadow">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Panel de Administración</h1>
+                    <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Panel de Administración</h1>
                     <p className="text-gray-600 mt-1">Gestiona tu restaurante desde aquí</p>
                 </div>
             </div>
@@ -100,7 +100,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-orange-400 to-red-500 rounded-md p-3">
                                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -128,7 +128,7 @@ const Dashboard = () => {
 
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-green-400 to-green-600 rounded-md p-3">
                                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -142,7 +142,7 @@ const Dashboard = () => {
 
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-orange-500 to-red-600 rounded-md p-3">
                                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
@@ -156,7 +156,7 @@ const Dashboard = () => {
 
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-pink-500 rounded-md p-3">
+                            <div className="flex-shrink-0 bg-gradient-to-br from-pink-400 to-red-500 rounded-md p-3">
                                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
@@ -184,8 +184,8 @@ const Dashboard = () => {
                     </Link>
 
                     <Link to="/admin/productos" className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 flex items-center">
-                        <div className="bg-green-100 rounded-lg p-3 mr-4">
-                            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg p-3 mr-4">
+                            <svg className="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
@@ -196,8 +196,8 @@ const Dashboard = () => {
                     </Link>
 
                     <Link to="/admin/categorias" className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 flex items-center">
-                        <div className="bg-purple-100 rounded-lg p-3 mr-4">
-                            <svg className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="bg-gradient-to-br from-red-100 to-red-200 rounded-lg p-3 mr-4">
+                            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                         </div>
@@ -208,7 +208,7 @@ const Dashboard = () => {
                     </Link>
 
                     <Link to="/admin/inventario" className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 flex items-center">
-                        <div className="bg-orange-100 rounded-lg p-3 mr-4">
+                        <div className="bg-gradient-to-br from-yellow-100 to-orange-200 rounded-lg p-3 mr-4">
                             <svg className="h-8 w-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
