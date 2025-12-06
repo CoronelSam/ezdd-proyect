@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import logo from '../assets/images/logo.png';
 import { useAuth } from '../hooks/useAuth';
 import { useCarrito } from '../hooks/useCarrito';
-import logo from '../assets/images/logo.png';
 
 const Navbar = () => {
     const location = useLocation();

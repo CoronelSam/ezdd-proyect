@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 import logo from '../../assets/images/logo.png';
+import { useAuth } from '../../hooks/useAuth';
 
 const Inicio = () => {
     const { estaAutenticado } = useAuth();
