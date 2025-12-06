@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/logo.webp';
 import { useAuth } from '../hooks/useAuth';
 import { useCarrito } from '../hooks/useCarrito';
 
