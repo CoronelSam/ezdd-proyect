@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import logo from '../../assets/images/logo.png';
 
 const Inicio = () => {
     const { estaAutenticado } = useAuth();
@@ -19,8 +20,8 @@ const Inicio = () => {
                     <div className="text-center">
                         {/* Logo/Icon */}
                         <div className="mb-8 flex justify-center">
-                            <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-6xl shadow-2xl">
-                                🍕
+                            <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-2xl overflow-hidden">
+                                <img src={logo} alt="El Sazón de Doris" className="w-full h-full object-cover" />
                             </div>
                         </div>
 

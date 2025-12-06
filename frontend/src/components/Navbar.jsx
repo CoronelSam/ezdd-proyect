@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCarrito } from '../hooks/useCarrito';
+import logo from '../assets/images/logo.png';
 
 const Navbar = () => {
     const location = useLocation();
@@ -31,8 +32,8 @@ const Navbar = () => {
                 <div className="flex justify-between items-center h-20">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition">
-                        <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
-                            🍕
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                            <img src={logo} alt="El Sazón de Doris" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-gray-800">El Sazón de Doris</h1>
