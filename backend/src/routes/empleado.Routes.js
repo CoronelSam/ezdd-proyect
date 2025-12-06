@@ -115,6 +115,7 @@ router.get('/email/:email', EmpleadoController.obtenerPorEmail);
 router.get('/puesto/:puesto', EmpleadoController.obtenerPorPuesto);
 router.put('/:id', validacionActualizar, EmpleadoController.actualizar);
 router.patch('/:id/salario', validacionActualizarSalario, EmpleadoController.actualizarSalario);
+router.patch('/:id/desactivar', validacionId, EmpleadoController.desactivar);
 router.patch('/:id/reactivar', validacionId, EmpleadoController.reactivar);
 router.delete('/:id', validacionId, EmpleadoController.eliminar);
 router.delete('/:id/permanente', validacionId, EmpleadoController.eliminarPermanente);

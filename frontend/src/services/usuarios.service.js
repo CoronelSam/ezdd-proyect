@@ -12,7 +12,8 @@ export const usuariosService = {
         if (filtros.username) params.append('username', filtros.username);
         
         const query = params.toString() ? `?${params.toString()}` : '';
-        return await http.get(`${API_CONFIG.ENDPOINTS.USUARIOS}${query}`);
+        const response = await http.get(`${API_CONFIG.ENDPOINTS.USUARIOS}${query}`);
+        return response.usuarios || [];
     },
 
     getById: async (id) => {

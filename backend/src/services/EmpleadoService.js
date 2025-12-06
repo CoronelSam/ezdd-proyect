@@ -134,6 +134,22 @@ class EmpleadoService {
     }
   }
 
+  async desactivarEmpleado(id) {
+    try {
+      const empleado = await Empleado.findByPk(id);
+
+      if (!empleado) {
+        throw new Error('Empleado no encontrado');
+      }
+
+      await empleado.update({ activo: false });
+
+      return empleado;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async eliminarEmpleadoPermanente(id) {
     try {
       const empleado = await Empleado.findByPk(id);

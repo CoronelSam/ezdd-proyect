@@ -206,9 +206,12 @@ class UsuarioSistemaController {
   async desactivar(req, res) {
     try {
       const { id } = req.params;
-      const resultado = await UsuarioSistemaService.desactivarUsuario(id);
+      const usuario = await UsuarioSistemaService.desactivarUsuario(id);
       
-      res.status(200).json(resultado);
+      res.status(200).json({
+        mensaje: 'Usuario desactivado exitosamente',
+        usuario
+      });
     } catch (error) {
       console.error('Error al desactivar usuario:', error);
       
@@ -226,9 +229,12 @@ class UsuarioSistemaController {
   async reactivar(req, res) {
     try {
       const { id } = req.params;
-      const resultado = await UsuarioSistemaService.reactivarUsuario(id);
+      const usuario = await UsuarioSistemaService.reactivarUsuario(id);
       
-      res.status(200).json(resultado);
+      res.status(200).json({
+        mensaje: 'Usuario reactivado exitosamente',
+        usuario
+      });
     } catch (error) {
       console.error('Error al reactivar usuario:', error);
       

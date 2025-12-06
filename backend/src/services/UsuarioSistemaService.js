@@ -205,7 +205,7 @@ class UsuarioSistemaService {
 
       await usuario.update({ activo: false });
 
-      return { mensaje: 'Usuario desactivado exitosamente' };
+      return await this.obtenerUsuarioPorId(id);
     } catch (error) {
       throw error;
     }
@@ -228,7 +228,7 @@ class UsuarioSistemaService {
 
       await usuario.update({ activo: true });
 
-      return { mensaje: 'Usuario reactivado exitosamente' };
+      return await this.obtenerUsuarioPorId(id);
     } catch (error) {
       throw error;
     }

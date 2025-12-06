@@ -166,7 +166,7 @@ function ProductosCliente() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-brand-50 to-white">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-brand-50 to-white">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
                     <p className="text-lg text-neutral-600">Cargando productos...</p>
@@ -177,7 +177,7 @@ function ProductosCliente() {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-brand-50 to-white p-6">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-brand-50 to-white p-6">
                 <div className="max-w-md w-full bg-white shadow-lg rounded-xl p-8 text-center">
                     <svg className="mx-auto h-16 w-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -196,7 +196,7 @@ function ProductosCliente() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+        <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50">
             {/* Filtros y búsqueda */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="bg-white rounded-xl shadow-md p-6 mb-8">
@@ -271,7 +271,7 @@ function ProductosCliente() {
                                     onClick={() => abrirDetalleProducto(producto)}
                                 >
                                     {/* Imagen placeholder */}
-                                    <div className="h-48 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center relative">
+                                    <div className="h-48 bg-linear-to-br from-brand-100 to-brand-200 flex items-center justify-center relative">
                                         <svg className="h-20 w-20 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
@@ -335,7 +335,7 @@ function ProductosCliente() {
 
             {/* Modal de detalle del producto */}
             {productoSeleccionado && (
-                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={cerrarDetalleProducto}>
+                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={cerrarDetalleProducto}>
                     <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         {/* Header del modal */}
                         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
@@ -355,7 +355,7 @@ function ProductosCliente() {
                             {/* Badge de disponibilidad */}
                             {!productoSeleccionado.activo && (
                                 <div className="mb-6 p-4 bg-red-50 border-2 border-red-500 rounded-lg flex items-center gap-3">
-                                    <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg className="w-6 h-6 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                     </svg>
                                     <div>
@@ -366,7 +366,7 @@ function ProductosCliente() {
                             )}
 
                             {/* Imagen placeholder */}
-                            <div className="h-64 bg-gradient-to-br from-brand-100 to-brand-200 rounded-xl flex items-center justify-center mb-6">
+                            <div className="h-64 bg-linear-to-br from-brand-100 to-brand-200 rounded-xl flex items-center justify-center mb-6">
                                 <svg className="h-32 w-32 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -434,7 +434,7 @@ function ProductosCliente() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                                             </svg>
                                         </button>
-                                        <span className="px-6 py-2 border-x-2 border-neutral-200 min-w-[4rem] text-center font-semibold text-lg">
+                                        <span className="px-6 py-2 border-x-2 border-neutral-200 min-w-16 text-center font-semibold text-lg">
                                             {cantidad}
                                         </span>
                                         <button
@@ -484,7 +484,7 @@ function ProductosCliente() {
                                 <div>
                                     <p className="text-sm text-neutral-500 mb-1">Categoría</p>
                                     <p className="font-medium text-gray-800">
-                                        {categorias.find(c => c.id_categoria_producto === productoSeleccionado.id_categoria_producto)?.nombre || 'N/A'}
+                                        {categorias.find(c => c.id_categoria === productoSeleccionado.id_categoria)?.nombre || 'N/A'}
                                     </p>
                                 </div>
                                 <div>

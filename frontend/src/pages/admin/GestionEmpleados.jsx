@@ -30,10 +30,11 @@ const GestionEmpleados = () => {
         try {
             setLoading(true);
             const data = await empleadosService.getAll();
-            setEmpleados(data);
+            setEmpleados(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error al cargar empleados:', error);
             setError('No se pudieron cargar los empleados');
+            setEmpleados([]);
         } finally {
             setLoading(false);
         }
@@ -152,24 +153,24 @@ const GestionEmpleados = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-6 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Empleados</h1>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-red-600">Gestión de Empleados</h1>
                         <p className="text-gray-600 mt-1">Administra tu equipo de trabajo</p>
                     </div>
                     <button
                         onClick={abrirModalNuevo}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
+                        className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
                     >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -227,7 +228,7 @@ const GestionEmpleados = () => {
                                     <tr key={empleado.id_empleado} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                                <div className="h-10 w-10 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                                                     <span className="text-white font-semibold">
                                                         {empleado.nombre.charAt(0).toUpperCase()}
                                                     </span>
@@ -312,7 +313,7 @@ const GestionEmpleados = () => {
 
             {/* Modal Crear/Editar */}
             {mostrarModal && (
-                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6">
                             {empleadoSeleccionado ? 'Editar Empleado' : 'Nuevo Empleado'}
@@ -413,7 +414,7 @@ const GestionEmpleados = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
+                                    className="flex-1 px-6 py-3 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     {empleadoSeleccionado ? 'Actualizar' : 'Crear Empleado'}
                                 </button>

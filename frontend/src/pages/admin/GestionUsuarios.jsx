@@ -40,11 +40,12 @@ const GestionUsuarios = () => {
         try {
             setLoading(true);
             const data = await usuariosService.getAll();
-            setUsuarios(data);
+            setUsuarios(Array.isArray(data) ? data : []);
             setError(null);
         } catch (err) {
             console.error('Error al cargar usuarios:', err);
             setError('No se pudieron cargar los usuarios');
+            setUsuarios([]);
         } finally {
             setLoading(false);
         }
@@ -112,7 +113,7 @@ const GestionUsuarios = () => {
                 if (!dataToSend.password) {
                     delete dataToSend.password;
                 }
-                await usuariosService.update(usuarioSeleccionado.id_usuario_sistema, dataToSend);
+                await usuariosService.update(usuarioSeleccionado.usuario_id, dataToSend);
                 setExito('Usuario actualizado exitosamente');
             } else {
                 // Al crear, password es requerido
@@ -148,7 +149,7 @@ const GestionUsuarios = () => {
         }
 
         try {
-            await usuariosService.cambiarPassword(usuarioSeleccionado.id_usuario_sistema, {
+            await usuariosService.cambiarPassword(usuarioSeleccionado.usuario_id, {
                 passwordActual: formPassword.passwordActual,
                 passwordNuevo: formPassword.passwordNuevo
             });
@@ -164,10 +165,10 @@ const GestionUsuarios = () => {
     const toggleEstado = async (usuario) => {
         try {
             if (usuario.activo) {
-                await usuariosService.desactivar(usuario.id_usuario_sistema);
+                await usuariosService.desactivar(usuario.usuario_id);
                 setExito('Usuario desactivado');
             } else {
-                await usuariosService.reactivar(usuario.id_usuario_sistema);
+                await usuariosService.reactivar(usuario.usuario_id);
                 setExito('Usuario reactivado');
             }
             await cargarUsuarios();
@@ -202,24 +203,24 @@ const GestionUsuarios = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Usuarios del Sistema</h1>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-red-600">Gestión de Usuarios del Sistema</h1>
                         <p className="text-gray-600 mt-1">Administra los accesos al sistema</p>
                     </div>
                     <button
                         onClick={() => abrirModal()}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
+                        className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -294,11 +295,11 @@ const GestionUsuarios = () => {
                                 </tr>
                             ) : (
                                 usuariosFiltrados.map((usuario) => (
-                                    <tr key={usuario.id_usuario_sistema} className="hover:bg-gray-50">
+                                    <tr key={usuario.usuario_id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10">
-                                                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-md">
+                                                <div className="shrink-0 h-10 w-10">
+                                                    <div className="h-10 w-10 rounded-full bg-linear-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-md">
                                                         <span className="text-white font-medium text-sm">
                                                             {usuario.username.substring(0, 2).toUpperCase()}
                                                         </span>
@@ -309,7 +310,7 @@ const GestionUsuarios = () => {
                                                         {usuario.username}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        ID: {usuario.id_usuario_sistema}
+                                                        ID: {usuario.usuario_id}
                                                     </div>
                                                 </div>
                                             </div>
@@ -344,15 +345,6 @@ const GestionUsuarios = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
                                                 <button
-                                                    onClick={() => abrirModalPassword(usuario)}
-                                                    className="text-blue-600 hover:text-blue-900"
-                                                    title="Cambiar contraseña"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                                    </svg>
-                                                </button>
-                                                <button
                                                     onClick={() => abrirModal(usuario)}
                                                     className="text-orange-600 hover:text-orange-900"
                                                     title="Editar"
@@ -362,7 +354,26 @@ const GestionUsuarios = () => {
                                                     </svg>
                                                 </button>
                                                 <button
-                                                    onClick={() => eliminarUsuario(usuario.id_usuario_sistema)}
+                                                    onClick={() => toggleEstado(usuario)}
+                                                    className={`${
+                                                        usuario.activo
+                                                            ? 'text-yellow-600 hover:text-yellow-900'
+                                                            : 'text-green-600 hover:text-green-900'
+                                                    }`}
+                                                    title={usuario.activo ? 'Desactivar' : 'Activar'}
+                                                >
+                                                    {usuario.activo ? (
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                                <button
+                                                    onClick={() => eliminarUsuario(usuario.usuario_id)}
                                                     className="text-red-600 hover:text-red-900"
                                                     title="Eliminar"
                                                 >
@@ -382,7 +393,7 @@ const GestionUsuarios = () => {
 
             {/* Modal Crear/Editar Usuario */}
             {modalAbierto && (
-                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -456,7 +467,7 @@ const GestionUsuarios = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
+                                    className="flex-1 px-4 py-2 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     {usuarioSeleccionado ? 'Actualizar' : 'Crear'}
                                 </button>
@@ -468,7 +479,7 @@ const GestionUsuarios = () => {
 
             {/* Modal Cambiar Contraseña */}
             {modalPassword && (
-                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -529,7 +540,7 @@ const GestionUsuarios = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
+                                    className="flex-1 px-4 py-2 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     Cambiar Contraseña
                                 </button>

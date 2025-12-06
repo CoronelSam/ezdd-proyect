@@ -261,6 +261,31 @@ class EmpleadoController {
     }
   }
 
+  async desactivar(req, res) {
+    try {
+      const { id } = req.params;
+      const empleadoDesactivado = await EmpleadoService.desactivarEmpleado(id);
+      
+      res.status(200).json({
+        mensaje: 'Empleado desactivado exitosamente',
+        empleado: empleadoDesactivado
+      });
+    } catch (error) {
+      console.error('Error al desactivar empleado:', error);
+      
+      if (error.message === 'Empleado no encontrado') {
+        return res.status(404).json({ 
+          error: 'Empleado no encontrado' 
+        });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al desactivar el empleado',
+        mensaje: error.message 
+      });
+    }
+  }
+
   async reactivar(req, res) {
     try {
       const { id } = req.params;
