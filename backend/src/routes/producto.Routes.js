@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const ProductoController = require('../controllers/Producto.Controller');
 const { body, param } = require('express-validator');
+const { autenticar } = require('../middleware/auth.middleware');
+const { verificarPermiso } = require('../middleware/casl.middleware');
+const { MODULOS } = require('../utils/constants');
 
 const validacionCrear = [
   body('nombre')
@@ -60,16 +63,16 @@ const validacionIdCategoria = [
     .isInt({ min: 1 }).withMessage('ID de categoría inválido')
 ];
 
-// Rutas
-router.post('/', validacionCrear, ProductoController.crear);
+// Rutas - Las operaciones de lectura son públicas para clientes
+router.post('/', autenticar, verificarPermiso('create', MODULOS.PRODUCTO), validacionCrear, ProductoController.crear);
 router.get('/', ProductoController.obtenerTodos);
 router.get('/buscar', ProductoController.buscarPorNombre);
-router.get('/estadisticas', ProductoController.obtenerEstadisticas);
+router.get('/estadisticas', autenticar, verificarPermiso('read', MODULOS.PRODUCTO), ProductoController.obtenerEstadisticas);
 router.get('/categoria/:idCategoria', validacionIdCategoria, ProductoController.obtenerPorCategoria);
 router.get('/:id', validacionId, ProductoController.obtenerPorId);
-router.put('/:id', validacionActualizar, ProductoController.actualizar);
-router.patch('/:id/reactivar', validacionId, ProductoController.reactivar);
-router.delete('/:id', validacionId, ProductoController.eliminar);
-router.delete('/:id/permanente', validacionId, ProductoController.eliminarPermanente);
+router.put('/:id', autenticar, verificarPermiso('update', MODULOS.PRODUCTO), validacionActualizar, ProductoController.actualizar);
+router.patch('/:id/reactivar', autenticar, verificarPermiso('update', MODULOS.PRODUCTO), validacionId, ProductoController.reactivar);
+router.delete('/:id', autenticar, verificarPermiso('delete', MODULOS.PRODUCTO), validacionId, ProductoController.eliminar);
+router.delete('/:id/permanente', autenticar, verificarPermiso('delete', MODULOS.PRODUCTO), validacionId, ProductoController.eliminarPermanente);
 
 module.exports = router;

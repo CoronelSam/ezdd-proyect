@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { categoriasService, preciosService, productosService } from '../../services';
+import { Can } from '../../context/AbilityContext';
+import { usePermissions } from '../../hooks/usePermissions';
+import { APP_CONSTANTS } from '../../config/constants';
+
+const { MODULOS } = APP_CONSTANTS;
 
 const GestionProductos = () => {
     const [productos, setProductos] = useState([]);
@@ -130,15 +135,17 @@ const GestionProductos = () => {
                         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Productos</h1>
                         <p className="text-gray-600 mt-1">Administra el menú del restaurante</p>
                     </div>
-                    <button
-                        onClick={() => abrirModal()}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nuevo Producto
-                    </button>
+                    <Can I="create" a={MODULOS.PRODUCTO}>
+                        <button
+                            onClick={() => abrirModal()}
+                            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Nuevo Producto
+                        </button>
+                    </Can>
                 </div>
 
                 {/* Filtros */}
@@ -191,26 +198,32 @@ const GestionProductos = () => {
                                     Categoría: {producto.categoria?.nombre || categorias.find(c => c.id_categoria === producto.id_categoria)?.nombre || 'N/A'}
                                 </p>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => abrirGestionPrecios(producto)}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition text-sm shadow-md"
-                                    >
-                                        Precios
-                                    </button>
-                                    <button
-                                        onClick={() => abrirModal(producto)}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition text-sm shadow-md"
-                                    >
-                                        Editar
-                                    </button>
-                                    <button
-                                        onClick={() => eliminarProducto(producto.id_producto)}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                    <Can I="read" a={MODULOS.PRECIO}>
+                                        <button
+                                            onClick={() => abrirGestionPrecios(producto)}
+                                            className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition text-sm shadow-md"
+                                        >
+                                            Precios
+                                        </button>
+                                    </Can>
+                                    <Can I="update" a={MODULOS.PRODUCTO}>
+                                        <button
+                                            onClick={() => abrirModal(producto)}
+                                            className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition text-sm shadow-md"
+                                        >
+                                            Editar
+                                        </button>
+                                    </Can>
+                                    <Can I="delete" a={MODULOS.PRODUCTO}>
+                                        <button
+                                            onClick={() => eliminarProducto(producto.id_producto)}
+                                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </Can>
                                 </div>
                             </div>
                         </div>

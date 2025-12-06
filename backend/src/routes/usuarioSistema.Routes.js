@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const UsuarioSistemaController = require('../controllers/UsuarioSistema.Controller');
 const { body, param } = require('express-validator');
+const { autenticar } = require('../middleware/auth.middleware');
+const { verificarPermiso } = require('../middleware/casl.middleware');
+const { MODULOS } = require('../utils/constants');
 
 const validacionCrear = [
   body('empleado_id')
@@ -24,7 +27,7 @@ const validacionCrear = [
   
   body('rol')
     .notEmpty().withMessage('El rol es requerido')
-    .isIn(['mesero', 'cocinero', 'cajero', 'admin']).withMessage('El rol debe ser: mesero, cocinero, cajero o admin')
+    .isIn(['admin', 'gerente', 'cajero', 'mesero', 'cocinero']).withMessage('El rol debe ser: admin, gerente, cajero, mesero o cocinero')
 ];
 
 const validacionActualizar = [
@@ -43,7 +46,11 @@ const validacionActualizar = [
   
   body('rol')
     .optional()
-    .isIn(['mesero', 'cocinero', 'cajero', 'admin']).withMessage('El rol debe ser: mesero, cocinero, cajero o admin'),
+    .isIn(['admin', 'gerente', 'cajero', 'mesero', 'cocinero']).withMessage('El rol debe ser: admin, gerente, cajero, mesero o cocinero'),
+  
+  body('password')
+    .optional()
+    .isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
   
   body('activo')
     .optional()
@@ -85,16 +92,16 @@ const validacionUsername = [
 // Rutas públicas
 router.post('/login', validacionLogin, UsuarioSistemaController.login);
 
-// Rutas protegidas (en producción agregar middleware de autenticación)
-router.post('/', validacionCrear, UsuarioSistemaController.crear);
-router.get('/', UsuarioSistemaController.obtenerTodos);
-router.get('/estadisticas', UsuarioSistemaController.obtenerEstadisticas);
-router.get('/username/:username', validacionUsername, UsuarioSistemaController.obtenerPorUsername);
-router.get('/:id', validacionId, UsuarioSistemaController.obtenerPorId);
-router.put('/:id', validacionActualizar, UsuarioSistemaController.actualizar);
-router.patch('/:id/cambiar-password', validacionCambiarPassword, UsuarioSistemaController.cambiarPassword);
-router.patch('/:id/desactivar', validacionId, UsuarioSistemaController.desactivar);
-router.patch('/:id/reactivar', validacionId, UsuarioSistemaController.reactivar);
-router.delete('/:id', validacionId, UsuarioSistemaController.eliminar);
+// Rutas protegidas con permisos CASL
+router.post('/', autenticar, verificarPermiso('create', MODULOS.USUARIO_SISTEMA), validacionCrear, UsuarioSistemaController.crear);
+router.get('/', autenticar, verificarPermiso('read', MODULOS.USUARIO_SISTEMA), UsuarioSistemaController.obtenerTodos);
+router.get('/estadisticas', autenticar, verificarPermiso('read', MODULOS.USUARIO_SISTEMA), UsuarioSistemaController.obtenerEstadisticas);
+router.get('/username/:username', autenticar, verificarPermiso('read', MODULOS.USUARIO_SISTEMA), validacionUsername, UsuarioSistemaController.obtenerPorUsername);
+router.get('/:id', autenticar, verificarPermiso('read', MODULOS.USUARIO_SISTEMA), validacionId, UsuarioSistemaController.obtenerPorId);
+router.put('/:id', autenticar, verificarPermiso('update', MODULOS.USUARIO_SISTEMA), validacionActualizar, UsuarioSistemaController.actualizar);
+router.patch('/:id/cambiar-password', autenticar, verificarPermiso('update', MODULOS.USUARIO_SISTEMA), validacionCambiarPassword, UsuarioSistemaController.cambiarPassword);
+router.patch('/:id/desactivar', autenticar, verificarPermiso('update', MODULOS.USUARIO_SISTEMA), validacionId, UsuarioSistemaController.desactivar);
+router.patch('/:id/reactivar', autenticar, verificarPermiso('update', MODULOS.USUARIO_SISTEMA), validacionId, UsuarioSistemaController.reactivar);
+router.delete('/:id', autenticar, verificarPermiso('delete', MODULOS.USUARIO_SISTEMA), validacionId, UsuarioSistemaController.eliminar);
 
 module.exports = router;

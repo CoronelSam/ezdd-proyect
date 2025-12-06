@@ -2,17 +2,12 @@ import { http } from './http.service';
 import { API_CONFIG } from '../config/api';
 
 const authService = {
-    // Registro de cliente
+    // Registro de cliente (sin JWT - los clientes no usan tokens)
     registrarCliente: async (datos) => {
         try {
             const response = await http.post(API_CONFIG.ENDPOINTS.CLIENTES, datos);
             
             if (response.mensaje && response.cliente) {
-                // Guardar token si existe
-                if (response.token) {
-                    localStorage.setItem('token', response.token);
-                }
-                
                 return {
                     success: true,
                     data: {
@@ -35,16 +30,14 @@ const authService = {
         }
     },
 
-    // Login de cliente
+    // Login de cliente (sin JWT - los clientes no usan tokens)
     loginCliente: async (email, clave) => {
         try {
             const response = await http.post(`${API_CONFIG.ENDPOINTS.CLIENTES}/login`, { email, clave });
             
             if (response.mensaje && response.cliente) {
-                // Guardar token si existe
-                if (response.token) {
-                    localStorage.setItem('token', response.token);
-                }
+                // Limpiar cualquier token anterior (los clientes no usan JWT)
+                localStorage.removeItem('token');
                 
                 // Guardar datos del cliente en localStorage
                 localStorage.setItem('usuario', JSON.stringify({
@@ -97,6 +90,7 @@ const authService = {
                         usuario_id: response.usuario.usuario_id,
                         username: response.usuario.username,
                         rol: response.usuario.rol,
+                        activo: response.usuario.activo !== undefined ? response.usuario.activo : true,
                         empleado: response.usuario.empleado,
                         id_empleado: response.usuario.empleado.id_empleado,
                         nombre: response.usuario.empleado.nombre,

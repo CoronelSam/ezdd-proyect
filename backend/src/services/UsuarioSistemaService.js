@@ -162,6 +162,11 @@ class UsuarioSistemaService {
       if (data.rol) datosActualizar.rol = data.rol;
       if (data.empleado_id) datosActualizar.empleado_id = data.empleado_id;
       if (data.activo !== undefined) datosActualizar.activo = data.activo;
+      
+      // Permitir actualización de contraseña si se proporciona
+      if (data.password && data.password.trim().length > 0) {
+        datosActualizar.password_hash = data.password;
+      }
 
       await usuario.update(datosActualizar);
 
@@ -294,8 +299,8 @@ class UsuarioSistemaService {
           rol: usuario.rol,
           empleado_id: usuario.empleado_id
         },
-        process.env.JWT_SECRET || 'secret_key_default',
-        { expiresIn: '24h' }
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
       );
 
       return {

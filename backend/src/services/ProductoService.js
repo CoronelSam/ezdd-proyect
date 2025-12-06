@@ -51,7 +51,7 @@ class ProductoService {
         where.id_categoria = filtros.id_categoria;
       }
 
-      const PrecioProducto = require('./PrecioProductoService');
+      const PrecioProducto = require('../models/PrecioProductoModel');
       const productos = await Producto.findAll({
         where,
         include: [
@@ -61,12 +61,12 @@ class ProductoService {
             attributes: ['id_categoria', 'nombre']
           },
           {
-            model: require('../models/PrecioProductoModel'),
+            model: PrecioProducto,
             as: 'precio_default',
             attributes: ['id_precio', 'nombre_presentacion', 'precio']
           },
           {
-            model: require('../models/PrecioProductoModel'),
+            model: PrecioProducto,
             as: 'precios',
             attributes: ['id_precio', 'nombre_presentacion', 'descripcion', 'precio', 'es_default', 'activo']
           }
@@ -76,6 +76,7 @@ class ProductoService {
 
       return productos;
     } catch (error) {
+      console.error('Error en obtenerProductos:', error);
       throw error;
     }
   }

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const EmpleadoController = require('../controllers/Empleado.Controller');
 const { body, param } = require('express-validator');
+const { autenticar } = require('../middleware/auth.middleware');
+const { verificarPermiso } = require('../middleware/casl.middleware');
+const { MODULOS } = require('../utils/constants');
 
 const validacionCrear = [
   body('nombre')
@@ -107,17 +110,17 @@ const validacionId = [
     .isInt({ min: 1 }).withMessage('ID inválido')
 ];
 
-router.post('/', validacionCrear, EmpleadoController.crear);
-router.get('/', EmpleadoController.obtenerTodos);
-router.get('/estadisticas', EmpleadoController.obtenerEstadisticas);
-router.get('/:id', validacionId, EmpleadoController.obtenerPorId);
-router.get('/email/:email', EmpleadoController.obtenerPorEmail);
-router.get('/puesto/:puesto', EmpleadoController.obtenerPorPuesto);
-router.put('/:id', validacionActualizar, EmpleadoController.actualizar);
-router.patch('/:id/salario', validacionActualizarSalario, EmpleadoController.actualizarSalario);
-router.patch('/:id/desactivar', validacionId, EmpleadoController.desactivar);
-router.patch('/:id/reactivar', validacionId, EmpleadoController.reactivar);
-router.delete('/:id', validacionId, EmpleadoController.eliminar);
-router.delete('/:id/permanente', validacionId, EmpleadoController.eliminarPermanente);
+router.post('/', autenticar, verificarPermiso('create', MODULOS.EMPLEADO), validacionCrear, EmpleadoController.crear);
+router.get('/', autenticar, verificarPermiso('read', MODULOS.EMPLEADO), EmpleadoController.obtenerTodos);
+router.get('/estadisticas', autenticar, verificarPermiso('read', MODULOS.EMPLEADO), EmpleadoController.obtenerEstadisticas);
+router.get('/:id', autenticar, verificarPermiso('read', MODULOS.EMPLEADO), validacionId, EmpleadoController.obtenerPorId);
+router.get('/email/:email', autenticar, verificarPermiso('read', MODULOS.EMPLEADO), EmpleadoController.obtenerPorEmail);
+router.get('/puesto/:puesto', autenticar, verificarPermiso('read', MODULOS.EMPLEADO), EmpleadoController.obtenerPorPuesto);
+router.put('/:id', autenticar, verificarPermiso('update', MODULOS.EMPLEADO), validacionActualizar, EmpleadoController.actualizar);
+router.patch('/:id/salario', autenticar, verificarPermiso('update', MODULOS.EMPLEADO), validacionActualizarSalario, EmpleadoController.actualizarSalario);
+router.patch('/:id/desactivar', autenticar, verificarPermiso('update', MODULOS.EMPLEADO), validacionId, EmpleadoController.desactivar);
+router.patch('/:id/reactivar', autenticar, verificarPermiso('update', MODULOS.EMPLEADO), validacionId, EmpleadoController.reactivar);
+router.delete('/:id', autenticar, verificarPermiso('delete', MODULOS.EMPLEADO), validacionId, EmpleadoController.eliminar);
+router.delete('/:id/permanente', autenticar, verificarPermiso('delete', MODULOS.EMPLEADO), validacionId, EmpleadoController.eliminarPermanente);
 
 module.exports = router;

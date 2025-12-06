@@ -24,6 +24,51 @@ const APP_CONSTANTS = {
         GERENTE: 'Gerente'
     },
 
+    // Roles del sistema (para permisos)
+    ROLES: {
+        ADMIN: 'admin',
+        GERENTE: 'gerente',
+        CAJERO: 'cajero',
+        MESERO: 'mesero',
+        COCINERO: 'cocinero'
+    },
+
+    // Descripciones de roles
+    ROLES_DESCRIPCION: {
+        admin: 'Administrador del sistema - Acceso total',
+        gerente: 'Gerente - Gestión operativa completa',
+        cajero: 'Cajero - Ventas y cobros',
+        mesero: 'Mesero - Toma de pedidos',
+        cocinero: 'Cocinero - Preparación de alimentos'
+    },
+
+    // Módulos del sistema
+    MODULOS: {
+        PRODUCTO: 'Producto',
+        CATEGORIA: 'CategoriaProducto',
+        PRECIO: 'PrecioProducto',
+        INVENTARIO: 'Inventario',
+        INGREDIENTE: 'Ingrediente',
+        MOVIMIENTO_INVENTARIO: 'MovimientoInventario',
+        PEDIDO: 'Pedido',
+        DETALLE_PEDIDO: 'DetallePedido',
+        CLIENTE: 'Cliente',
+        EMPLEADO: 'Empleado',
+        USUARIO_SISTEMA: 'UsuarioSistema',
+        RECETA: 'Receta',
+        REPORTE: 'Reporte',
+        ESTADISTICA: 'Estadistica'
+    },
+
+    // Acciones CRUD
+    ACCIONES: {
+        CREATE: 'create',
+        READ: 'read',
+        UPDATE: 'update',
+        DELETE: 'delete',
+        MANAGE: 'manage'
+    },
+
     UNIDADES_MEDIDA: [
         'Kilogramo (kg)',
         'Gramo (g)',

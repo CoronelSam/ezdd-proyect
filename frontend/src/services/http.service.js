@@ -26,12 +26,13 @@ httpClient.interceptors.response.use(
     },
     (error) => {
         if (error.response) {
+            const isLoginRequest = error.config?.url?.includes('/login');
+            
             switch (error.response.status) {
                 case 401:
-                    // No autorizado - redirigir a login si es necesario
-                    console.error('No autorizado. Por favor inicie sesión.');
-                    // localStorage.removeItem('token');
-                    // window.location.href = '/login';
+                    if (!isLoginRequest) {
+                        console.error('No autorizado. Por favor inicie sesión.');
+                    }
                     break;
                 case 404:
                     console.error('Recurso no encontrado.');

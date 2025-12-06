@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { usuariosService } from '../../services';
+import { Can } from '../../context/AbilityContext';
+import { APP_CONSTANTS } from '../../config/constants';
+import { ModalConfirmacion } from '../../components';
+
+const { MODULOS } = APP_CONSTANTS;
 
 const GestionUsuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
@@ -7,6 +12,8 @@ const GestionUsuarios = () => {
     const [modalAbierto, setModalAbierto] = useState(false);
     const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
     const [modalPassword, setModalPassword] = useState(false);
+    const [modalConfirmacion, setModalConfirmacion] = useState(false);
+    const [accionConfirmacion, setAccionConfirmacion] = useState(null);
     const [busqueda, setBusqueda] = useState('');
     const [filtroRol, setFiltroRol] = useState('todos');
     const [error, setError] = useState(null);
@@ -108,7 +115,6 @@ const GestionUsuarios = () => {
 
         try {
             if (usuarioSeleccionado) {
-                // Al editar, no enviamos password si está vacío
                 const dataToSend = { ...formData };
                 if (!dataToSend.password) {
                     delete dataToSend.password;
@@ -150,8 +156,8 @@ const GestionUsuarios = () => {
 
         try {
             await usuariosService.cambiarPassword(usuarioSeleccionado.usuario_id, {
-                passwordActual: formPassword.passwordActual,
-                passwordNuevo: formPassword.passwordNuevo
+                password_actual: formPassword.passwordActual,
+                password_nuevo: formPassword.passwordNuevo
             });
             setExito('Contraseña cambiada exitosamente');
             cerrarModalPassword();
@@ -162,37 +168,77 @@ const GestionUsuarios = () => {
         }
     };
 
-    const toggleEstado = async (usuario) => {
-        try {
-            if (usuario.activo) {
-                await usuariosService.desactivar(usuario.usuario_id);
-                setExito('Usuario desactivado');
-            } else {
-                await usuariosService.reactivar(usuario.usuario_id);
-                setExito('Usuario reactivado');
+    const toggleEstado = (usuario) => {
+        setUsuarioSeleccionado(usuario);
+        setAccionConfirmacion({
+            tipo: usuario.activo ? 'advertencia' : 'exito',
+            titulo: usuario.activo ? 'Desactivar Usuario' : 'Activar Usuario',
+            mensaje: usuario.activo 
+                ? `¿Está seguro de desactivar al usuario "${usuario.username}"?`
+                : `¿Está seguro de activar al usuario "${usuario.username}"?`,
+            descripcion: usuario.activo
+                ? 'El usuario no podrá iniciar sesión hasta que sea reactivado.'
+                : 'El usuario podrá iniciar sesión inmediatamente.',
+            textoBotonConfirmar: usuario.activo ? 'Desactivar' : 'Activar',
+            textoBotonCancelar: 'Cancelar',
+            onConfirmar: async () => {
+                setModalConfirmacion(false);
+                try {
+                    if (usuario.activo) {
+                        await usuariosService.desactivar(usuario.usuario_id);
+                        setExito('Usuario desactivado exitosamente');
+                    } else {
+                        await usuariosService.reactivar(usuario.usuario_id);
+                        setExito('Usuario activado exitosamente');
+                    }
+                    await cargarUsuarios();
+                    setTimeout(() => setExito(null), 3000);
+                } catch (err) {
+                    console.error('Error al cambiar estado:', err);
+                    setError('Error al cambiar el estado del usuario');
+                }
+                setAccionConfirmacion(null);
+                setUsuarioSeleccionado(null);
+            },
+            onCancelar: () => {
+                setModalConfirmacion(false);
+                setAccionConfirmacion(null);
+                setUsuarioSeleccionado(null);
             }
-            await cargarUsuarios();
-            setTimeout(() => setExito(null), 3000);
-        } catch (err) {
-            console.error('Error al cambiar estado:', err);
-            setError('Error al cambiar el estado del usuario');
-        }
+        });
+        setModalConfirmacion(true);
     };
 
-    const eliminarUsuario = async (id) => {
-        if (!window.confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        try {
-            await usuariosService.delete(id);
-            setExito('Usuario eliminado exitosamente');
-            await cargarUsuarios();
-            setTimeout(() => setExito(null), 3000);
-        } catch (err) {
-            console.error('Error al eliminar:', err);
-            setError('Error al eliminar el usuario');
-        }
+    const eliminarUsuario = (usuario) => {
+        setUsuarioSeleccionado(usuario);
+        setAccionConfirmacion({
+            tipo: 'peligro',
+            titulo: 'Eliminar Usuario',
+            mensaje: `¿Está seguro de eliminar al usuario "${usuario.username}"?`,
+            descripcion: 'Esta acción es permanente y no se puede deshacer. Se eliminarán todos los registros asociados a este usuario.',
+            textoBotonConfirmar: 'Eliminar',
+            textoBotonCancelar: 'Cancelar',
+            onConfirmar: async () => {
+                setModalConfirmacion(false);
+                try {
+                    await usuariosService.delete(usuario.usuario_id);
+                    setExito('Usuario eliminado exitosamente');
+                    await cargarUsuarios();
+                    setTimeout(() => setExito(null), 3000);
+                } catch (err) {
+                    console.error('Error al eliminar:', err);
+                    setError('Error al eliminar el usuario');
+                }
+                setAccionConfirmacion(null);
+                setUsuarioSeleccionado(null);
+            },
+            onCancelar: () => {
+                setModalConfirmacion(false);
+                setAccionConfirmacion(null);
+                setUsuarioSeleccionado(null);
+            }
+        });
+        setModalConfirmacion(true);
     };
 
     const usuariosFiltrados = usuarios.filter(u => {
@@ -203,30 +249,32 @@ const GestionUsuarios = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-yellow-50 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-red-600">Gestión de Usuarios del Sistema</h1>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Gestión de Usuarios del Sistema</h1>
                         <p className="text-gray-600 mt-1">Administra los accesos al sistema</p>
                     </div>
-                    <button
-                        onClick={() => abrirModal()}
-                        className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nuevo Usuario
-                    </button>
+                    <Can I="create" a={MODULOS.USUARIO_SISTEMA}>
+                        <button
+                            onClick={() => abrirModal()}
+                            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition flex items-center gap-2 shadow-lg"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Nuevo Usuario
+                        </button>
+                    </Can>
                 </div>
 
                 {/* Mensajes */}
@@ -298,8 +346,8 @@ const GestionUsuarios = () => {
                                     <tr key={usuario.usuario_id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="shrink-0 h-10 w-10">
-                                                    <div className="h-10 w-10 rounded-full bg-linear-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-md">
+                                                <div className="flex-shrink-0 h-10 w-10">
+                                                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-md">
                                                         <span className="text-white font-medium text-sm">
                                                             {usuario.username.substring(0, 2).toUpperCase()}
                                                         </span>
@@ -326,61 +374,64 @@ const GestionUsuarios = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                onClick={() => toggleEstado(usuario)}
-                                                className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    usuario.activo
-                                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                        : 'bg-red-100 text-red-800 hover:bg-red-200'
-                                                } transition cursor-pointer`}
-                                            >
+                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                usuario.activo 
+                                                    ? 'bg-green-100 text-green-800' 
+                                                    : 'bg-gray-100 text-gray-800'
+                                            }`}>
                                                 {usuario.activo ? 'Activo' : 'Inactivo'}
-                                            </button>
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {usuario.ultima_conexion 
-                                                ? new Date(usuario.ultima_conexion).toLocaleDateString('es-HN')
+                                            {usuario.ultimo_login 
+                                                ? new Date(usuario.ultimo_login).toLocaleDateString('es-HN')
                                                 : 'Nunca'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={() => abrirModal(usuario)}
-                                                    className="text-orange-600 hover:text-orange-900"
-                                                    title="Editar"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    onClick={() => toggleEstado(usuario)}
-                                                    className={`${
-                                                        usuario.activo
-                                                            ? 'text-yellow-600 hover:text-yellow-900'
-                                                            : 'text-green-600 hover:text-green-900'
-                                                    }`}
-                                                    title={usuario.activo ? 'Desactivar' : 'Activar'}
-                                                >
-                                                    {usuario.activo ? (
+                                                <Can I="update" a={MODULOS.USUARIO_SISTEMA}>
+                                                    <button
+                                                        onClick={() => abrirModal(usuario)}
+                                                        className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-colors"
+                                                        title="Editar usuario"
+                                                    >
                                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
-                                                    ) : (
+                                                    </button>
+                                                </Can>
+                                                <Can I="update" a={MODULOS.USUARIO_SISTEMA}>
+                                                    <button
+                                                        onClick={() => toggleEstado(usuario)}
+                                                        className={`p-2 rounded-lg transition-colors ${
+                                                            usuario.activo
+                                                                ? 'text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50'
+                                                                : 'text-green-600 hover:text-green-900 hover:bg-green-50'
+                                                        }`}
+                                                        title={usuario.activo ? 'Desactivar usuario' : 'Activar usuario'}
+                                                    >
+                                                        {usuario.activo ? (
+                                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </Can>
+                                                <Can I="delete" a={MODULOS.USUARIO_SISTEMA}>
+                                                    <button
+                                                        onClick={() => eliminarUsuario(usuario)}
+                                                        className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
+                                                        title="Eliminar usuario"
+                                                    >
                                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
-                                                    )}
-                                                </button>
-                                                <button
-                                                    onClick={() => eliminarUsuario(usuario.usuario_id)}
-                                                    className="text-red-600 hover:text-red-900"
-                                                    title="Eliminar"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
+                                                    </button>
+                                                </Can>
                                             </div>
                                         </td>
                                     </tr>
@@ -393,7 +444,7 @@ const GestionUsuarios = () => {
 
             {/* Modal Crear/Editar Usuario */}
             {modalAbierto && (
-                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -444,18 +495,6 @@ const GestionUsuarios = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id="activo"
-                                        checked={formData.activo}
-                                        onChange={(e) => setFormData({...formData, activo: e.target.checked})}
-                                        className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor="activo" className="ml-2 block text-sm text-gray-900">
-                                        Usuario activo
-                                    </label>
-                                </div>
                             </div>
                             <div className="mt-6 flex gap-3">
                                 <button
@@ -467,7 +506,7 @@ const GestionUsuarios = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
+                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     {usuarioSeleccionado ? 'Actualizar' : 'Crear'}
                                 </button>
@@ -477,9 +516,22 @@ const GestionUsuarios = () => {
                 </div>
             )}
 
+            {/* Modal de Confirmación */}
+            <ModalConfirmacion
+                mostrar={modalConfirmacion}
+                tipo={accionConfirmacion?.tipo}
+                titulo={accionConfirmacion?.titulo}
+                mensaje={accionConfirmacion?.mensaje}
+                descripcion={accionConfirmacion?.descripcion}
+                textoBotonConfirmar={accionConfirmacion?.textoBotonConfirmar}
+                textoBotonCancelar={accionConfirmacion?.textoBotonCancelar}
+                onConfirmar={accionConfirmacion?.onConfirmar}
+                onCancelar={accionConfirmacion?.onCancelar}
+            />
+
             {/* Modal Cambiar Contraseña */}
             {modalPassword && (
-                <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-gradient-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg max-w-md w-full">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">
@@ -540,7 +592,7 @@ const GestionUsuarios = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2 bg-linear-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
+                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg"
                                 >
                                     Cambiar Contraseña
                                 </button>

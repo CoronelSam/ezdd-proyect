@@ -1,8 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-export const ProtectedRoute = ({ children, requireAdmin = false }) => {
-    const { estaAutenticado, esAdmin, cargando } = useAuth();
+/**
+ * Ruta protegida que requiere autenticación JWT
+ * Los permisos específicos se manejan con CASL dentro de los componentes
+ */
+export const ProtectedRoute = ({ children }) => {
+    const { estaAutenticado, cargando } = useAuth();
 
     if (cargando) {
         return (
@@ -16,13 +20,12 @@ export const ProtectedRoute = ({ children, requireAdmin = false }) => {
         return <Navigate to="/login" replace />;
     }
 
-    if (requireAdmin && !esAdmin()) {
-        return <Navigate to="/" replace />;
-    }
-
     return children;
 };
 
+/**
+ * Ruta pública que redirige si el usuario ya está autenticado
+ */
 export const PublicRoute = ({ children }) => {
     const { estaAutenticado, esAdmin } = useAuth();
 

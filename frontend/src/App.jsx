@@ -1,5 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { AbilityProvider } from './context/AbilityContext'
 import { CarritoProvider } from './context/CarritoContext'
 import './index.css'
 
@@ -34,8 +35,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <CarritoProvider>
-          <Routes>
+        <AbilityProvider>
+          <CarritoProvider>
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={
               <div className="min-h-screen">
@@ -86,9 +88,9 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Admin Protected Routes */}
+            {/* Admin Protected Routes - Permissions managed by CASL within components */}
             <Route path="/admin" element={
-              <ProtectedRoute requireAdmin={true}>
+              <ProtectedRoute>
                 <AdminLayout />
               </ProtectedRoute>
             }>
@@ -103,7 +105,8 @@ function App() {
               <Route path="usuarios" element={<GestionUsuarios />} />
             </Route>
           </Routes>
-        </CarritoProvider>
+          </CarritoProvider>
+        </AbilityProvider>
       </AuthProvider>
     </Router>
   )

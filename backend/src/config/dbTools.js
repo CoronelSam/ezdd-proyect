@@ -140,8 +140,9 @@ const seedDatabase = async () => {
     ]);
     console.log(`✓ ${empleados.length} empleados creados.`);
 
-    // Crear usuarios del sistema
+    // Crear usuarios del sistema con roles RBAC
     // Las contraseñas se hashearán automáticamente con bcrypt mediante los hooks del modelo
+    // IMPORTANTE: Todos usan la contraseña 'password123' para pruebas
     const usuarios = await UsuarioSistema.bulkCreate([
       { 
         empleado_id: empleados[0].id_empleado, 
@@ -152,28 +153,28 @@ const seedDatabase = async () => {
       },
       { 
         empleado_id: empleados[1].id_empleado, 
-        username: 'maria.chef', 
+        username: 'gerente', 
         password_hash: 'password123', 
-        rol: 'cocinero',
+        rol: 'gerente',
         activo: true 
       },
       { 
         empleado_id: empleados[2].id_empleado, 
-        username: 'carlos.mesero', 
+        username: 'mesero', 
         password_hash: 'password123', 
         rol: 'mesero',
         activo: true 
       },
       { 
         empleado_id: empleados[3].id_empleado, 
-        username: 'ana.cajero', 
+        username: 'cajero', 
         password_hash: 'password123', 
         rol: 'cajero',
         activo: true 
       },
       { 
         empleado_id: empleados[4].id_empleado, 
-        username: 'pedro.cocinero', 
+        username: 'cocinero', 
         password_hash: 'password123', 
         rol: 'cocinero',
         activo: true 
@@ -182,6 +183,12 @@ const seedDatabase = async () => {
       individualHooks: true
     });
     console.log(`✓ ${usuarios.length} usuarios del sistema creados.`);
+    console.log('\n📋 Usuarios creados para pruebas:');
+    console.log('   Username: admin      | Password: password123 | Rol: admin (acceso completo)');
+    console.log('   Username: gerente    | Password: password123 | Rol: gerente (gestión completa)');
+    console.log('   Username: mesero     | Password: password123 | Rol: mesero (solo pedidos)');
+    console.log('   Username: cajero     | Password: password123 | Rol: cajero (pedidos y productos)');
+    console.log('   Username: cocinero   | Password: password123 | Rol: cocinero (solo ver pedidos)');
 
     // Crear ingredientes
     const ingredientes = await Ingrediente.bulkCreate([

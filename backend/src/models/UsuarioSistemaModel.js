@@ -44,12 +44,13 @@ const UsuarioSistema = sequelize.define('UsuarioSistema', {
     }
   },
   rol: {
-    type: DataTypes.ENUM('mesero', 'cocinero', 'cajero', 'admin'),
+    type: DataTypes.ENUM('admin', 'gerente', 'cajero', 'mesero', 'cocinero'),
     allowNull: false,
+    defaultValue: 'mesero',
     validate: {
       isIn: {
-        args: [['mesero', 'cocinero', 'cajero', 'admin']],
-        msg: 'El rol debe ser: mesero, cocinero, cajero o admin'
+        args: [['admin', 'gerente', 'cajero', 'mesero', 'cocinero']],
+        msg: 'El rol debe ser: admin, gerente, cajero, mesero o cocinero'
       }
     }
   },
