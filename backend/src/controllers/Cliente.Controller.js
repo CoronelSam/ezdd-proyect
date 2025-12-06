@@ -214,8 +214,13 @@ class ClienteController {
         });
       }
 
-      const { id } = req.params;
-      const { clave_actual, clave_nueva } = req.body;
+      // Si viene de autenticarCliente, usar req.cliente.id_cliente
+      // Si viene de admin, usar req.params.id
+      const id = req.cliente ? req.cliente.id_cliente : req.params.id;
+      
+      // Soportar tanto camelCase (desde perfil) como snake_case (desde admin)
+      const clave_actual = req.body.claveActual || req.body.clave_actual;
+      const clave_nueva = req.body.claveNueva || req.body.clave_nueva;
 
       const resultado = await ClienteService.cambiarClave(id, clave_actual, clave_nueva);
       
@@ -286,11 +291,13 @@ class ClienteController {
       }
 
       const { email, clave } = req.body;
-      const cliente = await ClienteService.verificarCredenciales(email, clave);
+      const resultado = await ClienteService.autenticarCliente(email, clave);
       
       res.status(200).json({
         mensaje: 'Login exitoso',
-        cliente
+        token: resultado.token,
+        refreshToken: resultado.refreshToken,
+        cliente: resultado.cliente
       });
     } catch (error) {
       console.error('Error en login:', error);
@@ -303,6 +310,92 @@ class ClienteController {
 
       res.status(500).json({ 
         error: 'Error al iniciar sesión',
+        mensaje: error.message 
+      });
+    }
+  }
+
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.body;
+      
+      if (!refreshToken) {
+        return res.status(400).json({
+          error: 'Refresh token requerido'
+        });
+      }
+
+      const resultado = await ClienteService.renovarToken(refreshToken);
+      
+      res.status(200).json({
+        mensaje: 'Token renovado exitosamente',
+        token: resultado.token,
+        refreshToken: resultado.refreshToken
+      });
+    } catch (error) {
+      console.error('Error al renovar token:', error);
+      
+      if (error.message === 'Refresh token inválido o expirado') {
+        return res.status(401).json({ 
+          error: error.message 
+        });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al renovar el token',
+        mensaje: error.message 
+      });
+    }
+  }
+
+  async obtenerPerfil(req, res) {
+    try {
+      // req.cliente viene del middleware autenticarCliente
+      const cliente = await ClienteService.obtenerClientePorId(req.cliente.id_cliente);
+      
+      res.status(200).json({
+        cliente
+      });
+    } catch (error) {
+      console.error('Error al obtener perfil:', error);
+      res.status(500).json({ 
+        error: 'Error al obtener el perfil',
+        mensaje: error.message 
+      });
+    }
+  }
+
+  async actualizarPerfil(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ 
+          error: 'Errores de validación', 
+          detalles: errors.array() 
+        });
+      }
+
+      // req.cliente viene del middleware autenticarCliente
+      const clienteActualizado = await ClienteService.actualizarCliente(
+        req.cliente.id_cliente, 
+        req.body
+      );
+      
+      res.status(200).json({
+        mensaje: 'Perfil actualizado exitosamente',
+        cliente: clienteActualizado
+      });
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        return res.status(400).json({ 
+          error: 'El email ya está registrado' 
+        });
+      }
+
+      res.status(500).json({ 
+        error: 'Error al actualizar el perfil',
         mensaje: error.message 
       });
     }

@@ -11,4 +11,4 @@ export { default as EmptyState } from './EmptyState';
 export { default as AdminLayout } from './AdminLayout';
 export { default as Carrito } from './Carrito';
 export { default as Navbar } from './Navbar';
-export { default as ProtectedRoute } from './ProtectedRoute';
+export { ProtectedRoute, PublicRoute } from './ProtectedRoute';

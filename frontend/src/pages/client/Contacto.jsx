@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { clientesService } from '../../services';
+import { useClientePerfil } from '../../hooks/useClientePerfil';
 
 const Contacto = () => {
     const { actualizarUsuario } = useAuth();
-    const [cliente, setCliente] = useState(null);
+    const { perfil, cargando, error: errorPerfil, cargarPerfil, actualizarPerfil, cambiarClave } = useClientePerfil();
+    
     const [editandoPerfil, setEditandoPerfil] = useState(false);
     const [editandoClave, setEditandoClave] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState(null);
     const [exito, setExito] = useState(null);
     
     const [formPerfil, setFormPerfil] = useState({
         nombre: '',
-        email: '',
-        telefono: ''
+        telefono: '',
+        direccion: ''
     });
 
     const [formClave, setFormClave] = useState({
@@ -25,33 +25,18 @@ const Contacto = () => {
     });
 
     useEffect(() => {
-        cargarDatosCliente();
+        cargarPerfil();
     }, []);
 
-    const cargarDatosCliente = async () => {
-        try {
-            setLoading(true);
-            const clienteId = localStorage.getItem('id_cliente');
-            if (!clienteId) {
-                setError('No se encontró la sesión del cliente');
-                return;
-            }
-            
-            const data = await clientesService.getById(clienteId);
-            setCliente(data);
+    useEffect(() => {
+        if (perfil) {
             setFormPerfil({
-                nombre: data.nombre || '',
-                email: data.email || '',
-                telefono: data.telefono || ''
+                nombre: perfil.nombre || '',
+                telefono: perfil.telefono || '',
+                direccion: perfil.direccion || ''
             });
-            setError(null);
-        } catch (err) {
-            console.error('Error al cargar datos del cliente:', err);
-            setError('No se pudieron cargar tus datos');
-        } finally {
-            setLoading(false);
         }
-    };
+    }, [perfil]);
 
     const handlePerfilChange = (e) => {
         const { name, value } = e.target;
@@ -76,32 +61,27 @@ const Contacto = () => {
         setGuardando(true);
 
         try {
-            const clienteId = localStorage.getItem('id_cliente');
-            const resultado = await clientesService.update(clienteId, {
-                nombre: formPerfil.nombre,
-                email: formPerfil.email,
-                telefono: formPerfil.telefono
-            });
+            const resultado = await actualizarPerfil(formPerfil);
             
-            // Extraer cliente del resultado
-            const clienteActualizado = resultado.cliente || resultado;
-            
-            // Actualizar el contexto de autenticación con los nuevos datos
-            actualizarUsuario({
-                nombre: clienteActualizado.nombre,
-                email: clienteActualizado.email,
-                telefono: clienteActualizado.telefono
-            });
-            
-            setExito('Perfil actualizado exitosamente. Ahora puedes iniciar sesión con tu nuevo email.');
-            setEditandoPerfil(false);
-            await cargarDatosCliente();
-            
-            // Limpiar mensaje de éxito después de 5 segundos
-            setTimeout(() => setExito(null), 5000);
+            if (resultado.success) {
+                // Actualizar el contexto de autenticación con los nuevos datos
+                actualizarUsuario({
+                    nombre: resultado.data.nombre,
+                    telefono: resultado.data.telefono,
+                    direccion: resultado.data.direccion
+                });
+                
+                setExito(resultado.mensaje || 'Perfil actualizado exitosamente');
+                setEditandoPerfil(false);
+                
+                // Limpiar mensaje de éxito después de 5 segundos
+                setTimeout(() => setExito(null), 5000);
+            } else {
+                setError(resultado.error);
+            }
         } catch (err) {
             console.error('Error al actualizar perfil:', err);
-            setError(err.response?.data?.error || 'No se pudo actualizar el perfil');
+            setError('No se pudo actualizar el perfil');
         } finally {
             setGuardando(false);
         }
@@ -126,28 +106,31 @@ const Contacto = () => {
         setGuardando(true);
 
         try {
-            const clienteId = localStorage.getItem('id_cliente');
-            await clientesService.cambiarClave(clienteId, formClave.claveActual, formClave.claveNueva);
+            const resultado = await cambiarClave(formClave.claveActual, formClave.claveNueva);
             
-            setExito('Contraseña actualizada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.');
-            setEditandoClave(false);
-            setFormClave({
-                claveActual: '',
-                claveNueva: '',
-                claveConfirmar: ''
-            });
-            
-            // Limpiar mensaje de éxito después de 5 segundos
-            setTimeout(() => setExito(null), 5000);
+            if (resultado.success) {
+                setExito(resultado.mensaje || 'Contraseña actualizada exitosamente');
+                setEditandoClave(false);
+                setFormClave({
+                    claveActual: '',
+                    claveNueva: '',
+                    claveConfirmar: ''
+                });
+                
+                // Limpiar mensaje de éxito después de 5 segundos
+                setTimeout(() => setExito(null), 5000);
+            } else {
+                setError(resultado.error);
+            }
         } catch (err) {
             console.error('Error al cambiar contraseña:', err);
-            setError(err.response?.data?.error || 'No se pudo cambiar la contraseña');
+            setError('No se pudo cambiar la contraseña');
         } finally {
             setGuardando(false);
         }
     };
 
-    if (loading) {
+    if (cargando && !perfil) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
@@ -162,7 +145,7 @@ const Contacto = () => {
                 <div className="text-center mb-8">
                     <div className="inline-flex w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full items-center justify-center mb-4 shadow-lg">
                         <span className="text-3xl font-bold text-white leading-none">
-                            {cliente?.nombre?.charAt(0).toUpperCase()}
+                            {perfil?.nombre?.charAt(0).toUpperCase()}
                         </span>
                     </div>
                     <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Mi Perfil</h1>
@@ -170,9 +153,9 @@ const Contacto = () => {
                 </div>
 
                 {/* Mensajes */}
-                {error && (
+                {(error || errorPerfil) && (
                     <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-                        <p className="text-red-700">{error}</p>
+                        <p className="text-red-700">{error || errorPerfil}</p>
                     </div>
                 )}
                 {exito && (
@@ -202,26 +185,34 @@ const Contacto = () => {
                                     <label className="block text-sm font-medium text-gray-500 mb-1">
                                         Nombre Completo
                                     </label>
-                                    <p className="text-gray-900 font-medium">{cliente?.nombre}</p>
+                                    <p className="text-gray-900 font-medium">{perfil?.nombre}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-500 mb-1">
                                         Email
                                     </label>
-                                    <p className="text-gray-900 font-medium">{cliente?.email}</p>
+                                    <p className="text-gray-900 font-medium">{perfil?.email}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-500 mb-1">
                                         Teléfono
                                     </label>
-                                    <p className="text-gray-900 font-medium">{cliente?.telefono || 'No registrado'}</p>
+                                    <p className="text-gray-900 font-medium">{perfil?.telefono || 'No registrado'}</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-500 mb-1">
-                                        Fecha de Registro
+                                        Dirección
                                     </label>
-                                    <p className="text-gray-900 font-medium">
-                                        {cliente?.fecha_registro ? new Date(cliente.fecha_registro).toLocaleDateString('es-HN') : 'N/A'}
+                                    <p className="text-gray-900 font-medium">{perfil?.direccion || 'No registrada'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-500 mb-1">
+                                        Estado
+                                    </label>
+                                    <p className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                        perfil?.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {perfil?.activo ? 'Activo' : 'Inactivo'}
                                     </p>
                                 </div>
                             </div>
@@ -242,19 +233,6 @@ const Contacto = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Email *
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        required
-                                        value={formPerfil.email}
-                                        onChange={handlePerfilChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Teléfono
                                     </label>
                                     <input
@@ -265,15 +243,27 @@ const Contacto = () => {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Dirección
+                                    </label>
+                                    <textarea
+                                        name="direccion"
+                                        value={formPerfil.direccion}
+                                        onChange={handlePerfilChange}
+                                        rows={3}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                </div>
                                 <div className="flex gap-3 pt-2">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setEditandoPerfil(false);
                                             setFormPerfil({
-                                                nombre: cliente?.nombre || '',
-                                                email: cliente?.email || '',
-                                                telefono: cliente?.telefono || ''
+                                                nombre: perfil?.nombre || '',
+                                                telefono: perfil?.telefono || '',
+                                                direccion: perfil?.direccion || ''
                                             });
                                         }}
                                         className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"

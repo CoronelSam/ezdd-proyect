@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { API_CONFIG } from '../config/api';
 
+// Importar API_CONFIG para usar en interceptor de refresh token
+const API_URL = API_CONFIG.API_URL;
+
 const httpClient = axios.create({
     baseURL: API_CONFIG.API_URL,
     timeout: API_CONFIG.REQUEST_CONFIG.timeout,
@@ -9,10 +12,19 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Prioridad: token de empleado/usuario del sistema
+        const tokenEmpleado = localStorage.getItem('token');
+        if (tokenEmpleado) {
+            config.headers.Authorization = `Bearer ${tokenEmpleado}`;
+            return config;
         }
+        
+        // Fallback: token de cliente
+        const tokenCliente = localStorage.getItem('clienteToken');
+        if (tokenCliente) {
+            config.headers.Authorization = `Bearer ${tokenCliente}`;
+        }
+        
         return config;
     },
     (error) => {
@@ -20,17 +32,92 @@ httpClient.interceptors.request.use(
     }
 );
 
+// Variable para evitar múltiples intentos de refresh simultáneos
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    
+    failedQueue = [];
+};
+
 httpClient.interceptors.response.use(
     (response) => {
         return response;
     },
-    (error) => {
+    async (error) => {
+        const originalRequest = error.config;
+        
         if (error.response) {
             const isLoginRequest = error.config?.url?.includes('/login');
+            const isRefreshRequest = error.config?.url?.includes('/refresh-token');
             
             switch (error.response.status) {
                 case 401:
-                    if (!isLoginRequest) {
+                    if (!isLoginRequest && !isRefreshRequest && !originalRequest._retry) {
+                        // Detectar si es un token de cliente expirado
+                        const hasClienteToken = localStorage.getItem('clienteToken');
+                        const hasRefreshToken = localStorage.getItem('clienteRefreshToken');
+                        
+                        if (hasClienteToken && hasRefreshToken) {
+                            if (isRefreshing) {
+                                // Si ya está refrescando, agregar a la cola
+                                return new Promise((resolve, reject) => {
+                                    failedQueue.push({ resolve, reject });
+                                })
+                                .then(token => {
+                                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                                    return httpClient(originalRequest);
+                                })
+                                .catch(err => Promise.reject(err));
+                            }
+
+                            originalRequest._retry = true;
+                            isRefreshing = true;
+
+                            try {
+                                // Intentar renovar el token del cliente usando axios directo para evitar recursión
+                                const refreshResponse = await axios.post(
+                                    `${API_URL}${API_CONFIG.ENDPOINTS.CLIENTES}/refresh-token`,
+                                    { refreshToken: hasRefreshToken },
+                                    { headers: { 'Content-Type': 'application/json' } }
+                                );
+
+                                const { token, refreshToken } = refreshResponse.data;
+                                localStorage.setItem('clienteToken', token);
+                                localStorage.setItem('clienteRefreshToken', refreshToken);
+
+                                originalRequest.headers.Authorization = `Bearer ${token}`;
+                                processQueue(null, token);
+                                
+                                return httpClient(originalRequest);
+                            } catch (refreshError) {
+                                processQueue(refreshError, null);
+                                
+                                // Token refresh falló, hacer logout
+                                localStorage.removeItem('clienteToken');
+                                localStorage.removeItem('clienteRefreshToken');
+                                localStorage.removeItem('usuario');
+                                localStorage.removeItem('id_cliente');
+                                
+                                // Redirigir al login si es necesario
+                                if (window.location.pathname !== '/login') {
+                                    window.location.href = '/login';
+                                }
+                                
+                                return Promise.reject(refreshError);
+                            } finally {
+                                isRefreshing = false;
+                            }
+                        }
+                        
                         console.error('No autorizado. Por favor inicie sesión.');
                     }
                     break;

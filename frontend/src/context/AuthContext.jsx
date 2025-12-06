@@ -16,11 +16,17 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         setUsuario(null);
-        localStorage.removeItem('usuario');
+        // Limpiar tokens de empleados/usuarios del sistema
         localStorage.removeItem('token');
+        // Limpiar tokens de clientes
+        localStorage.removeItem('clienteToken');
+        localStorage.removeItem('clienteRefreshToken');
+        // Limpiar datos de usuario
+        localStorage.removeItem('usuario');
         localStorage.removeItem('id_cliente');
         localStorage.removeItem('usuario_id');
         localStorage.removeItem('id_empleado');
+        // Limpiar carrito
         localStorage.removeItem('carrito');
     };
 

@@ -2,6 +2,7 @@ export { http, default as httpClient } from './http.service';
 
 // servicios principales
 export { default as authService } from './auth.service';
+export { clientePerfilService } from './cliente-perfil.service';
 export { default as clientesService } from './clientes.service';
 export { default as inventariosService } from './inventarios.service';
 export { default as pedidosService } from './pedidos.service';

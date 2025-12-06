@@ -2,7 +2,7 @@ import { http } from './http.service';
 import { API_CONFIG } from '../config/api';
 
 const authService = {
-    // Registro de cliente (sin JWT - los clientes no usan tokens)
+    // Registro de cliente (público, devuelve JWT)
     registrarCliente: async (datos) => {
         try {
             const response = await http.post(API_CONFIG.ENDPOINTS.CLIENTES, datos);
@@ -30,14 +30,15 @@ const authService = {
         }
     },
 
-    // Login de cliente (sin JWT - los clientes no usan tokens)
+    // Login de cliente (con JWT)
     loginCliente: async (email, clave) => {
         try {
             const response = await http.post(`${API_CONFIG.ENDPOINTS.CLIENTES}/login`, { email, clave });
             
-            if (response.mensaje && response.cliente) {
-                // Limpiar cualquier token anterior (los clientes no usan JWT)
-                localStorage.removeItem('token');
+            if (response.token && response.cliente) {
+                // Guardar tokens JWT del cliente
+                localStorage.setItem('clienteToken', response.token);
+                localStorage.setItem('clienteRefreshToken', response.refreshToken);
                 
                 // Guardar datos del cliente en localStorage
                 localStorage.setItem('usuario', JSON.stringify({
@@ -64,6 +65,41 @@ const authService = {
             return { 
                 success: false, 
                 error: error.response?.data?.error || 'Error al iniciar sesión' 
+            };
+        }
+    },
+
+    // Renovar token del cliente
+    refreshClienteToken: async () => {
+        try {
+            const refreshToken = localStorage.getItem('clienteRefreshToken');
+            
+            if (!refreshToken) {
+                return { success: false, error: 'No hay refresh token' };
+            }
+
+            const response = await http.post(`${API_CONFIG.ENDPOINTS.CLIENTES}/refresh-token`, { 
+                refreshToken 
+            });
+
+            if (response.token && response.refreshToken) {
+                localStorage.setItem('clienteToken', response.token);
+                localStorage.setItem('clienteRefreshToken', response.refreshToken);
+                return { success: true };
+            }
+
+            return { success: false, error: 'Error al renovar token' };
+        } catch (error) {
+            // Si el refresh token expiró, hacer logout
+            localStorage.removeItem('clienteToken');
+            localStorage.removeItem('clienteRefreshToken');
+            localStorage.removeItem('usuario');
+            localStorage.removeItem('id_cliente');
+            
+            return { 
+                success: false, 
+                error: 'Sesión expirada',
+                expired: true
             };
         }
     },
@@ -159,10 +195,15 @@ const authService = {
 
     // Cerrar sesión
     logout: () => {
+        // Limpiar tokens de empleados/usuarios
         localStorage.removeItem('token');
+        // Limpiar tokens de clientes
+        localStorage.removeItem('clienteToken');
+        localStorage.removeItem('clienteRefreshToken');
+        // Limpiar datos de usuario
         localStorage.removeItem('usuario');
         localStorage.removeItem('id_cliente');
-    }
+    },
 };
 
 export default authService;

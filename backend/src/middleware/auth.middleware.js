@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { UsuarioSistema, Empleado } = require('../models');
 
 /**
- * Middleware de autenticación JWT
+ * Middleware de autenticación JWT para empleados/usuarios del sistema
  * Verifica el token y adjunta el usuario al request
  */
 const autenticar = async (req, res, next) => {
