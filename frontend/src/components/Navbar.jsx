@@ -20,10 +20,11 @@ const Navbar = () => {
     };
 
     const navLinks = [
-        { path: '/', label: 'Inicio', icon: '🏠' },
-        { path: '/menu', label: 'Menú', icon: '🍽️' },
-        { path: '/mis-pedidos', label: 'Mis Pedidos', icon: '📦' },
-        { path: '/contacto', label: 'Mi Perfil', icon: '👤' }
+        { path: '/', label: 'Inicio' },
+        { path: '/menu', label: 'Menú' },
+        { path: '/mis-pedidos', label: 'Pedidos' },
+        { path: '/historial-pedidos', label: 'Historial' },
+        { path: '/contacto', label: 'Mi Perfil' }
     ];
 
     return (
@@ -47,14 +48,13 @@ const Navbar = () => {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+                                className={`px-4 py-2 rounded-lg font-medium transition ${
                                     isActive(link.path)
                                         ? 'bg-orange-500 text-white'
                                         : 'text-gray-700 hover:bg-orange-100'
                                 }`}
                             >
-                                <span>{link.icon}</span>
-                                <span>{link.label}</span>
+                                {link.label}
                             </Link>
                         ))}
                     </div>

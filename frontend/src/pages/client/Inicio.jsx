@@ -134,8 +134,8 @@ const Inicio = () => {
 
                     <div className="grid md:grid-cols-4 gap-6">
                         {[
-                            { emoji: '🍕', name: 'Pizzas', desc: 'Artesanales' },
-                            { emoji: '🍔', name: 'Hamburguesas', desc: 'Jugosas' },
+                            { emoji: '🍗', name: 'Pollo Frito', desc: 'Crujiente' },
+                            { emoji: '🍰', name: 'Postres', desc: 'Deliciosos' },
                             { emoji: '🍝', name: 'Pastas', desc: 'Frescas' },
                             { emoji: '🥤', name: 'Bebidas', desc: 'Refrescantes' }
                         ].map((item, index) => (

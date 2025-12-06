@@ -1,6 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
 import { AbilityProvider } from './context/AbilityContext'
+import { AuthProvider } from './context/AuthContext'
 import { CarritoProvider } from './context/CarritoContext'
 import './index.css'
 
@@ -12,6 +12,7 @@ import { ProtectedRoute, PublicRoute } from './components/ProtectedRoute'
 
 // Pages - Client
 import Contacto from './pages/client/Contacto'
+import HistorialPedidos from './pages/client/HistorialPedidos'
 import Inicio from './pages/client/Inicio'
 import MisPedidos from './pages/client/MisPedidos'
 import ProductosCliente from './pages/client/ProductosCliente'
@@ -75,6 +76,15 @@ function App() {
                   <Navbar />
                   <Carrito />
                   <MisPedidos />
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/historial-pedidos" element={
+              <ProtectedRoute>
+                <div className="min-h-screen">
+                  <Navbar />
+                  <Carrito />
+                  <HistorialPedidos />
                 </div>
               </ProtectedRoute>
             } />

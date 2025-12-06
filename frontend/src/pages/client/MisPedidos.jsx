@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import pedidosService from '../../services/pedidos.service';
-import { joinCliente, onNuevoPedido, onEstadoPedido, onPedidoCancelado, off } from '../../services/socket.service';
+import { joinCliente, off, onEstadoPedido, onNuevoPedido, onPedidoCancelado } from '../../services/socket.service';
 
 const MisPedidos = () => {
     const { usuario } = useAuth();
@@ -91,8 +91,13 @@ const MisPedidos = () => {
             // Cargar solo los pedidos del cliente autenticado
             const data = await pedidosService.getByCliente(usuario.id_cliente);
             
+            // Filtrar solo pedidos activos (excluir entregados y cancelados)
+            const pedidosActivos = data.filter(p => 
+                p.estado !== 'entregado' && p.estado !== 'cancelado'
+            );
+            
             // Ordenar por fecha más reciente
-            const pedidosOrdenados = data.sort((a, b) => 
+            const pedidosOrdenados = pedidosActivos.sort((a, b) => 
                 new Date(b.fecha_pedido) - new Date(a.fecha_pedido)
             );
             setPedidos(pedidosOrdenados);
@@ -207,8 +212,21 @@ const MisPedidos = () => {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-2">Mis Pedidos</h1>
-                    <p className="text-gray-600">Revisa el estado de tus pedidos en tiempo real</p>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-4xl font-bold text-gray-800 mb-2">Pedidos Activos</h1>
+                            <p className="text-gray-600">Revisa el estado de tus pedidos en tiempo real</p>
+                        </div>
+                        <a
+                            href="/historial-pedidos"
+                            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition shadow-lg flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Ver Historial
+                        </a>
+                    </div>
                 </div>
 
                 {/* Filtros */}
