@@ -16,12 +16,34 @@ export const productosService = {
     },
 
     create: async (productoData) => {
-        const response = await http.post(API_CONFIG.ENDPOINTS.PRODUCTOS, productoData);
+        const isFormData = productoData instanceof FormData;
+        const config = isFormData ? {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        } : {};
+        
+        const response = await http.post(
+            API_CONFIG.ENDPOINTS.PRODUCTOS, 
+            productoData,
+            config
+        );
         return response.producto;
     },
 
     update: async (id, productoData) => {
-        const response = await http.put(`${API_CONFIG.ENDPOINTS.PRODUCTOS}/${id}`, productoData);
+        const isFormData = productoData instanceof FormData;
+        const config = isFormData ? {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        } : {};
+        
+        const response = await http.put(
+            `${API_CONFIG.ENDPOINTS.PRODUCTOS}/${id}`, 
+            productoData,
+            config
+        );
         return response.producto;
     },
 

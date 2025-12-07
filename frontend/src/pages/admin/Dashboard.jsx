@@ -1,8 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { Can } from '@casl/react';
 import { clientesService, pedidosService, productosService } from '../../services';
+import { usePermissions } from '../../hooks/usePermissions';
+import { APP_CONSTANTS } from '../../config/constants';
 
 const Dashboard = () => {
+    const { ability } = usePermissions();
+    
+    // Verificar si el usuario tiene permiso para ver el Dashboard
+    if (!ability.can('read', APP_CONSTANTS.MODULOS.DASHBOARD)) {
+        return <Navigate to="/admin/pedidos" replace />;
+    }
+    
     const [stats, setStats] = useState({
         pedidosHoy: 0,
         pedidosPendientes: 0,

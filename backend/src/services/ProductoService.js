@@ -1,5 +1,6 @@
 const Producto = require('../models/ProductoModel');
 const CategoriaProducto = require('../models/CategoriaProductoModel');
+const { eliminarImagen } = require('../config/cloudinary');
 
 class ProductoService {
 
@@ -177,6 +178,18 @@ class ProductoService {
       // Excluir el campo 'precio' si viene en los datos (ahora se maneja en PrecioProducto)
       const { precio, ...datosProducto } = datosActualizados;
 
+      // Si se está actualizando la imagen y existe una imagen anterior, eliminarla
+      if (datosProducto.imagen_url && producto.imagen_url && 
+          datosProducto.imagen_url !== producto.imagen_url) {
+        try {
+          await eliminarImagen(producto.imagen_url);
+          console.log('Imagen anterior eliminada correctamente');
+        } catch (error) {
+          console.error('Error al eliminar imagen anterior:', error);
+          // No detener el proceso si falla la eliminación de la imagen anterior
+        }
+      }
+
       // Si se actualiza la categoría, verificar que exista y esté activa
       if (datosProducto.id_categoria) {
         const categoria = await CategoriaProducto.findByPk(datosProducto.id_categoria);
@@ -230,6 +243,17 @@ class ProductoService {
 
       if (!producto) {
         throw new Error('Producto no encontrado');
+      }
+
+      // Eliminar la imagen de Cloudinary si existe
+      if (producto.imagen_url) {
+        try {
+          await eliminarImagen(producto.imagen_url);
+          console.log('Imagen eliminada de Cloudinary correctamente');
+        } catch (error) {
+          console.error('Error al eliminar imagen de Cloudinary:', error);
+          // Continuar con la eliminación del producto aunque falle la eliminación de la imagen
+        }
       }
 
       await producto.destroy();

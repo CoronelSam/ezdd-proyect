@@ -5,6 +5,7 @@ const { body, param } = require('express-validator');
 const { autenticar } = require('../middleware/auth.middleware');
 const { verificarPermiso } = require('../middleware/casl.middleware');
 const { MODULOS } = require('../utils/constants');
+const { upload } = require('../config/cloudinary');
 
 const validacionCrear = [
   body('nombre')
@@ -18,12 +19,7 @@ const validacionCrear = [
   
   body('id_categoria')
     .notEmpty().withMessage('La categoría es requerida')
-    .isInt({ min: 1 }).withMessage('La categoría debe ser un número válido'),
-  
-  body('imagen_url')
-    .optional()
-    .trim()
-    .isURL().withMessage('Debe proporcionar una URL válida')
+    .isInt({ min: 1 }).withMessage('La categoría debe ser un número válido')
 ];
 
 const validacionActualizar = [
@@ -43,11 +39,6 @@ const validacionActualizar = [
     .optional()
     .isInt({ min: 1 }).withMessage('La categoría debe ser un número válido'),
   
-  body('imagen_url')
-    .optional()
-    .trim()
-    .isURL().withMessage('Debe proporcionar una URL válida'),
-  
   body('activo')
     .optional()
     .isBoolean().withMessage('El campo activo debe ser un booleano')
@@ -64,13 +55,28 @@ const validacionIdCategoria = [
 ];
 
 // Rutas - Las operaciones de lectura son públicas para clientes
-router.post('/', autenticar, verificarPermiso('create', MODULOS.PRODUCTO), validacionCrear, ProductoController.crear);
+router.post('/', 
+  autenticar, 
+  verificarPermiso('create', MODULOS.PRODUCTO), 
+  upload.single('imagen'),  // Middleware de Multer para subir imagen
+  validacionCrear, 
+  ProductoController.crear
+);
+
 router.get('/', ProductoController.obtenerTodos);
 router.get('/buscar', ProductoController.buscarPorNombre);
 router.get('/estadisticas', autenticar, verificarPermiso('read', MODULOS.PRODUCTO), ProductoController.obtenerEstadisticas);
 router.get('/categoria/:idCategoria', validacionIdCategoria, ProductoController.obtenerPorCategoria);
 router.get('/:id', validacionId, ProductoController.obtenerPorId);
-router.put('/:id', autenticar, verificarPermiso('update', MODULOS.PRODUCTO), validacionActualizar, ProductoController.actualizar);
+
+router.put('/:id', 
+  autenticar, 
+  verificarPermiso('update', MODULOS.PRODUCTO), 
+  upload.single('imagen'),  // Middleware de Multer para subir imagen
+  validacionActualizar, 
+  ProductoController.actualizar
+);
+
 router.patch('/:id/reactivar', autenticar, verificarPermiso('update', MODULOS.PRODUCTO), validacionId, ProductoController.reactivar);
 router.delete('/:id', autenticar, verificarPermiso('delete', MODULOS.PRODUCTO), validacionId, ProductoController.eliminar);
 router.delete('/:id/permanente', autenticar, verificarPermiso('delete', MODULOS.PRODUCTO), validacionId, ProductoController.eliminarPermanente);

@@ -38,7 +38,8 @@ const MODULOS = {
     USUARIO_SISTEMA: 'UsuarioSistema',
     RECETA: 'Receta',
     REPORTE: 'Reporte',
-    ESTADISTICA: 'Estadistica'
+    ESTADISTICA: 'Estadistica',
+    DASHBOARD: 'Dashboard'
 };
 
 // Acciones CRUD

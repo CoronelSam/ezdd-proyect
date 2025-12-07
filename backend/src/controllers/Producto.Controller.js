@@ -1,5 +1,6 @@
 const ProductoService = require('../services/ProductoService');
 const { validationResult } = require('express-validator');
+const { eliminarImagen } = require('../config/cloudinary');
 
 class ProductoController {
 
@@ -8,13 +9,27 @@ class ProductoController {
       // Validar errores de express-validator
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        // Si hay errores de validación y se subió una imagen, eliminarla
+        if (req.file) {
+          try {
+            await eliminarImagen(req.file.path);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen tras fallo de validación:', deleteError);
+          }
+        }
         return res.status(400).json({ 
           error: 'Errores de validación', 
           detalles: errors.array() 
         });
       }
 
-      const nuevoProducto = await ProductoService.crearProducto(req.body);
+      // Si se subió una imagen, agregarla a los datos del producto
+      const productoData = {
+        ...req.body,
+        imagen_url: req.file ? req.file.path : null
+      };
+
+      const nuevoProducto = await ProductoService.crearProducto(productoData);
       
       res.status(201).json({
         mensaje: 'Producto creado exitosamente',
@@ -22,6 +37,15 @@ class ProductoController {
       });
     } catch (error) {
       console.error('Error al crear producto:', error);
+      
+      // Si hay error y se subió una imagen, eliminarla de Cloudinary
+      if (req.file) {
+        try {
+          await eliminarImagen(req.file.path);
+        } catch (deleteError) {
+          console.error('Error al eliminar imagen tras fallo:', deleteError);
+        }
+      }
       
       if (error.message === 'La categoría especificada no existe' || 
           error.message === 'La categoría especificada está inactiva') {
@@ -145,6 +169,14 @@ class ProductoController {
       // Validar errores de express-validator
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        // Si hay errores de validación y se subió una imagen nueva, eliminarla
+        if (req.file) {
+          try {
+            await eliminarImagen(req.file.path);
+          } catch (deleteError) {
+            console.error('Error al eliminar imagen tras fallo de validación:', deleteError);
+          }
+        }
         return res.status(400).json({ 
           error: 'Errores de validación', 
           detalles: errors.array() 
@@ -152,7 +184,14 @@ class ProductoController {
       }
 
       const { id } = req.params;
-      const productoActualizado = await ProductoService.actualizarProducto(id, req.body);
+      
+      // Si se subió una imagen nueva, agregarla a los datos de actualización
+      const datosActualizados = {
+        ...req.body,
+        ...(req.file && { imagen_url: req.file.path })
+      };
+
+      const productoActualizado = await ProductoService.actualizarProducto(id, datosActualizados);
       
       res.status(200).json({
         mensaje: 'Producto actualizado exitosamente',
@@ -160,6 +199,15 @@ class ProductoController {
       });
     } catch (error) {
       console.error('Error al actualizar producto:', error);
+      
+      // Si hay error y se subió una imagen nueva, eliminarla de Cloudinary
+      if (req.file) {
+        try {
+          await eliminarImagen(req.file.path);
+        } catch (deleteError) {
+          console.error('Error al eliminar imagen tras fallo:', deleteError);
+        }
+      }
       
       if (error.message === 'Producto no encontrado') {
         return res.status(404).json({ 
