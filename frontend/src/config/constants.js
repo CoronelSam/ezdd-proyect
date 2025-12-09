@@ -71,16 +71,14 @@ const APP_CONSTANTS = {
     },
 
     UNIDADES_MEDIDA: [
-        'Kilogramo (kg)',
-        'Gramo (g)',
-        'Litro (L)',
-        'Mililitro (ml)',
-        'Unidad (u)',
-        'Porción',
-        'Taza',
-        'Cucharada',
-        'Cucharadita',
-        'Pizca'
+        { valor: 'litro', etiqueta: 'Litro (L)' },
+        { valor: 'pieza', etiqueta: 'Pieza' },
+        { valor: 'libra', etiqueta: 'Libra (lb)' },
+        { valor: 'unidad', etiqueta: 'Unidad' },
+        { valor: 'onza', etiqueta: 'Onza (oz)' },
+        { valor: 'ml', etiqueta: 'Mililitro (ml)' },
+        { valor: 'g', etiqueta: 'Gramo (g)' },
+        { valor: 'taza', etiqueta: 'Taza' }
     ],
 
     CATEGORIAS_COMUNES: [

@@ -26,6 +26,7 @@ import GestionInventario from './pages/admin/GestionInventario'
 import GestionPedidos from './pages/admin/GestionPedidos'
 import GestionPrecios from './pages/admin/GestionPrecios'
 import GestionProductos from './pages/admin/GestionProductos'
+import GestionRecetas from './pages/admin/GestionRecetas'
 import GestionUsuarios from './pages/admin/GestionUsuarios'
 
 // Pages - Auth
@@ -107,6 +108,7 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="pedidos" element={<GestionPedidos />} />
               <Route path="productos" element={<GestionProductos />} />
+              <Route path="recetas" element={<GestionRecetas />} />
               <Route path="categorias" element={<GestionCategorias />} />
               <Route path="inventario" element={<GestionInventario />} />
               <Route path="precios" element={<GestionPrecios />} />

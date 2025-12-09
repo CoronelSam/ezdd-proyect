@@ -23,7 +23,7 @@ const Ingrediente = sequelize.define('Ingrediente', {
     }
   },
   unidad_medida: {
-    type: DataTypes.ENUM('kg', 'g', 'l', 'ml', 'unidad', 'pieza', 'libra', 'onza', 'taza'),
+    type: DataTypes.ENUM('litro', 'pieza', 'libra', 'unidad', 'onza', 'ml', 'g', 'taza'),
     allowNull: false,
     validate: {
       notEmpty: {

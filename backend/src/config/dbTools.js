@@ -183,68 +183,76 @@ const seedDatabase = async () => {
       individualHooks: true
     });
     console.log(`✓ ${usuarios.length} usuarios del sistema creados.`);
-    console.log('\n📋 Usuarios creados para pruebas:');
-    console.log('   Username: admin      | Password: password123 | Rol: admin (acceso completo)');
-    console.log('   Username: gerente    | Password: password123 | Rol: gerente (gestión completa)');
-    console.log('   Username: mesero     | Password: password123 | Rol: mesero (solo pedidos)');
-    console.log('   Username: cajero     | Password: password123 | Rol: cajero (pedidos y productos)');
-    console.log('   Username: cocinero   | Password: password123 | Rol: cocinero (solo ver pedidos)');
 
     // Crear ingredientes
     const ingredientes = await Ingrediente.bulkCreate([
-      { nombre: 'Pollo', unidad_medida: 'kg', precio_compra: 85.00, stock_minimo: 10, activo: true },
-      { nombre: 'Harina', unidad_medida: 'kg', precio_compra: 25.00, stock_minimo: 20, activo: true },
-      { nombre: 'Aceite Vegetal', unidad_medida: 'l', precio_compra: 45.00, stock_minimo: 5, activo: true },
-      { nombre: 'Sal', unidad_medida: 'kg', precio_compra: 10.00, stock_minimo: 5, activo: true },
-      { nombre: 'Lechuga', unidad_medida: 'kg', precio_compra: 30.00, stock_minimo: 3, activo: true },
-      { nombre: 'Tomate', unidad_medida: 'kg', precio_compra: 25.00, stock_minimo: 5, activo: true },
-      { nombre: 'Pasta', unidad_medida: 'kg', precio_compra: 35.00, stock_minimo: 10, activo: true },
-      { nombre: 'Crema', unidad_medida: 'l', precio_compra: 60.00, stock_minimo: 3, activo: true },
-      { nombre: 'Café en Grano', unidad_medida: 'kg', precio_compra: 180.00, stock_minimo: 5, activo: true },
-      { nombre: 'Naranja', unidad_medida: 'kg', precio_compra: 20.00, stock_minimo: 10, activo: true }
+      { nombre: 'Pollo', unidad_medida: 'libra', precio_compra: 38.50, stock_minimo: 20, activo: true },
+      { nombre: 'Harina', unidad_medida: 'libra', precio_compra: 11.34, stock_minimo: 40, activo: true },
+      { nombre: 'Aceite Vegetal', unidad_medida: 'litro', precio_compra: 45.00, stock_minimo: 5, activo: true },
+      { nombre: 'Sal', unidad_medida: 'libra', precio_compra: 4.54, stock_minimo: 10, activo: true },
+      { nombre: 'Lechuga', unidad_medida: 'libra', precio_compra: 13.61, stock_minimo: 6, activo: true },
+      { nombre: 'Tomate', unidad_medida: 'libra', precio_compra: 11.34, stock_minimo: 10, activo: true },
+      { nombre: 'Pasta', unidad_medida: 'libra', precio_compra: 15.88, stock_minimo: 20, activo: true },
+      { nombre: 'Crema', unidad_medida: 'litro', precio_compra: 60.00, stock_minimo: 3, activo: true },
+      { nombre: 'Café en Grano', unidad_medida: 'libra', precio_compra: 81.65, stock_minimo: 10, activo: true },
+      { nombre: 'Naranja', unidad_medida: 'libra', precio_compra: 9.07, stock_minimo: 20, activo: true },
+      { nombre: 'Refresco Cola', unidad_medida: 'unidad', precio_compra: 12.00, stock_minimo: 50, activo: true },
+      { nombre: 'Agua Embotellada', unidad_medida: 'unidad', precio_compra: 8.00, stock_minimo: 100, activo: true },
+      { nombre: 'Queso', unidad_medida: 'libra', precio_compra: 54.43, stock_minimo: 5, activo: true },
+      { nombre: 'Mantequilla', unidad_medida: 'libra', precio_compra: 45.36, stock_minimo: 5, activo: true },
+      { nombre: 'Huevo', unidad_medida: 'pieza', precio_compra: 2.50, stock_minimo: 100, activo: true }
     ]);
     console.log(`✓ ${ingredientes.length} ingredientes creados.`);
 
     // Crear recetas
     const recetas = await Receta.bulkCreate([
       // Ensalada César (producto 1)
-      { id_producto: 1, id_ingrediente: 5, cantidad_necesaria: 0.150 }, // Lechuga
-      { id_producto: 1, id_ingrediente: 6, cantidad_necesaria: 0.050 }, // Tomate
+      { id_producto: 1, id_ingrediente: 5, cantidad_necesaria: 0.33 }, // Lechuga 
+      { id_producto: 1, id_ingrediente: 6, cantidad_necesaria: 0.11 }, // Tomate 
+      { id_producto: 1, id_ingrediente: 13, cantidad_necesaria: 0.04 }, // Queso
       
       // Sopa de Tomate (producto 2)
-      { id_producto: 2, id_ingrediente: 6, cantidad_necesaria: 0.300 }, // Tomate
-      { id_producto: 2, id_ingrediente: 8, cantidad_necesaria: 0.100 }, // Crema
+      { id_producto: 2, id_ingrediente: 6, cantidad_necesaria: 0.66 }, // Tomate
+      { id_producto: 2, id_ingrediente: 8, cantidad_necesaria: 0.10 }, // Crema
+      { id_producto: 2, id_ingrediente: 4, cantidad_necesaria: 0.01 }, // Sal
       
-      // Pollo Frito (producto 3)
-      { id_producto: 3, id_ingrediente: 1, cantidad_necesaria: 0.500 }, // Pollo
-      { id_producto: 3, id_ingrediente: 2, cantidad_necesaria: 0.100 }, // Harina
-      { id_producto: 3, id_ingrediente: 3, cantidad_necesaria: 0.200 }, // Aceite
-      { id_producto: 3, id_ingrediente: 4, cantidad_necesaria: 0.010 }, // Sal
+      // Pollo Frito (producto 3) - por cada 3 piezas
+      { id_producto: 3, id_ingrediente: 1, cantidad_necesaria: 1.10 }, // Pollo 
+      { id_producto: 3, id_ingrediente: 2, cantidad_necesaria: 0.22 }, // Harina 
+      { id_producto: 3, id_ingrediente: 3, cantidad_necesaria: 0.20 }, // Aceite 
+      { id_producto: 3, id_ingrediente: 4, cantidad_necesaria: 0.02 }, // Sal 
       
       // Pasta Alfredo (producto 4)
-      { id_producto: 4, id_ingrediente: 7, cantidad_necesaria: 0.200 }, // Pasta
-      { id_producto: 4, id_ingrediente: 8, cantidad_necesaria: 0.150 }, // Crema
+      { id_producto: 4, id_ingrediente: 7, cantidad_necesaria: 0.44 }, // Pasta 
+      { id_producto: 4, id_ingrediente: 8, cantidad_necesaria: 0.15 }, // Crema 
+      { id_producto: 4, id_ingrediente: 13, cantidad_necesaria: 0.11 }, // Queso 
+      { id_producto: 4, id_ingrediente: 14, cantidad_necesaria: 0.04 }, // Mantequilla 
       
-      // Café (producto 6)
-      { id_producto: 6, id_ingrediente: 9, cantidad_necesaria: 0.015 }, // Café en grano
+      // Café (producto 6) - por taza
+      { id_producto: 6, id_ingrediente: 9, cantidad_necesaria: 0.03 }, // Café en grano 
       
       // Jugo de Naranja (producto 7)
-      { id_producto: 7, id_ingrediente: 10, cantidad_necesaria: 0.300 } // Naranja
+      { id_producto: 7, id_ingrediente: 10, cantidad_necesaria: 0.66 } // Naranja
     ]);
     console.log(`✓ ${recetas.length} recetas creadas.`);
 
     // Crear inventarios
     const inventarios = await Inventario.bulkCreate([
-      { id_ingrediente: 1, cantidad_actual: 25.500, fecha_actualizacion: new Date() }, // Pollo
-      { id_ingrediente: 2, cantidad_actual: 50.000, fecha_actualizacion: new Date() }, // Harina
-      { id_ingrediente: 3, cantidad_actual: 8.500, fecha_actualizacion: new Date() },  // Aceite
-      { id_ingrediente: 4, cantidad_actual: 12.000, fecha_actualizacion: new Date() }, // Sal
-      { id_ingrediente: 5, cantidad_actual: 5.200, fecha_actualizacion: new Date() },  // Lechuga
-      { id_ingrediente: 6, cantidad_actual: 8.750, fecha_actualizacion: new Date() },  // Tomate
-      { id_ingrediente: 7, cantidad_actual: 30.000, fecha_actualizacion: new Date() }, // Pasta
-      { id_ingrediente: 8, cantidad_actual: 6.500, fecha_actualizacion: new Date() },  // Crema
-      { id_ingrediente: 9, cantidad_actual: 12.000, fecha_actualizacion: new Date() }, // Café
-      { id_ingrediente: 10, cantidad_actual: 15.500, fecha_actualizacion: new Date() } // Naranja
+      { id_ingrediente: 1, cantidad_actual: 56.00, fecha_actualizacion: new Date() },  // Pollo - 56 lb
+      { id_ingrediente: 2, cantidad_actual: 110.00, fecha_actualizacion: new Date() }, // Harina - 110 lb
+      { id_ingrediente: 3, cantidad_actual: 8.50, fecha_actualizacion: new Date() },   // Aceite - 8.5 L
+      { id_ingrediente: 4, cantidad_actual: 26.50, fecha_actualizacion: new Date() },  // Sal - 26.5 lb
+      { id_ingrediente: 5, cantidad_actual: 11.50, fecha_actualizacion: new Date() },  // Lechuga - 11.5 lb
+      { id_ingrediente: 6, cantidad_actual: 19.25, fecha_actualizacion: new Date() },  // Tomate - 19.25 lb
+      { id_ingrediente: 7, cantidad_actual: 66.00, fecha_actualizacion: new Date() },  // Pasta - 66 lb
+      { id_ingrediente: 8, cantidad_actual: 6.50, fecha_actualizacion: new Date() },   // Crema - 6.5 L
+      { id_ingrediente: 9, cantidad_actual: 26.50, fecha_actualizacion: new Date() },  // Café - 26.5 lb
+      { id_ingrediente: 10, cantidad_actual: 34.00, fecha_actualizacion: new Date() }, // Naranja - 34 lb
+      { id_ingrediente: 11, cantidad_actual: 150.00, fecha_actualizacion: new Date() },// Refresco - 150 unidades
+      { id_ingrediente: 12, cantidad_actual: 250.00, fecha_actualizacion: new Date() },// Agua - 250 unidades
+      { id_ingrediente: 13, cantidad_actual: 11.00, fecha_actualizacion: new Date() }, // Queso - 11 lb
+      { id_ingrediente: 14, cantidad_actual: 8.80, fecha_actualizacion: new Date() },  // Mantequilla - 8.8 lb
+      { id_ingrediente: 15, cantidad_actual: 200.00, fecha_actualizacion: new Date() } // Huevo - 200 piezas
     ]);
     console.log(`✓ ${inventarios.length} inventarios creados.`);
 
@@ -284,19 +292,24 @@ const seedDatabase = async () => {
     // Crear movimientos de inventario
     const movimientos = await MovimientoInventario.bulkCreate([
       // Entradas iniciales
-      { id_ingrediente: 1, tipo_movimiento: 'entrada', cantidad: 30.000, id_empleado: 1, notas: 'Compra inicial' },
-      { id_ingrediente: 2, tipo_movimiento: 'entrada', cantidad: 50.000, id_empleado: 1, notas: 'Compra inicial' },
-      { id_ingrediente: 3, tipo_movimiento: 'entrada', cantidad: 10.000, id_empleado: 1, notas: 'Compra inicial' },
+      { id_ingrediente: 1, tipo_movimiento: 'entrada', cantidad: 66.00, id_empleado: 1, notas: 'Compra inicial de pollo' },
+      { id_ingrediente: 2, tipo_movimiento: 'entrada', cantidad: 110.00, id_empleado: 1, notas: 'Compra inicial de harina' },
+      { id_ingrediente: 3, tipo_movimiento: 'entrada', cantidad: 10.00, id_empleado: 1, notas: 'Compra inicial de aceite' },
+      { id_ingrediente: 11, tipo_movimiento: 'entrada', cantidad: 200.00, id_empleado: 1, notas: 'Compra inicial de refrescos' },
+      { id_ingrediente: 12, tipo_movimiento: 'entrada', cantidad: 300.00, id_empleado: 1, notas: 'Compra inicial de agua' },
       
-      // Salidas por pedidos
-      { id_ingrediente: 1, tipo_movimiento: 'salida', cantidad: 2.000, id_pedido: 2, id_empleado: 3, notas: 'Salida por pedido' },
-      { id_ingrediente: 5, tipo_movimiento: 'salida', cantidad: 0.150, id_pedido: 1, id_empleado: 3, notas: 'Salida por pedido' },
+      // Salidas por pedidos (basadas en las recetas)
+      { id_ingrediente: 1, tipo_movimiento: 'salida', cantidad: 2.20, id_pedido: 2, id_empleado: 3, notas: 'Salida por pedido #2 - Pollo Frito x2' },
+      { id_ingrediente: 5, tipo_movimiento: 'salida', cantidad: 0.33, id_pedido: 1, id_empleado: 3, notas: 'Salida por pedido #1 - Ensalada César' },
+      { id_ingrediente: 7, tipo_movimiento: 'salida', cantidad: 0.44, id_pedido: 1, id_empleado: 3, notas: 'Salida por pedido #1 - Pasta Alfredo' },
       
       // Ajustes
-      { id_ingrediente: 4, tipo_movimiento: 'ajuste', cantidad: 2.000, id_empleado: 2, notas: 'Ajuste de inventario' },
+      { id_ingrediente: 4, tipo_movimiento: 'ajuste', cantidad: 4.40, id_empleado: 2, notas: 'Ajuste de inventario de sal' },
+      { id_ingrediente: 15, tipo_movimiento: 'ajuste', cantidad: 24.00, id_empleado: 2, notas: 'Ajuste de inventario - 2 docenas de huevos' },
       
       // Mermas
-      { id_ingrediente: 6, tipo_movimiento: 'merma', cantidad: 0.500, id_empleado: 2, notas: 'Producto vencido' }
+      { id_ingrediente: 6, tipo_movimiento: 'merma', cantidad: 1.10, id_empleado: 2, notas: 'Tomates vencidos' },
+      { id_ingrediente: 11, tipo_movimiento: 'merma', cantidad: 50.00, id_empleado: 2, notas: 'Refrescos próximos a vencer' }
     ]);
     console.log(`✓ ${movimientos.length} movimientos de inventario creados.`);
 
