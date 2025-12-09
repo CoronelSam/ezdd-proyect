@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { usePermissions } from '../hooks/usePermissions';
 import { joinAdmin, off, onEstadoPedido, onNuevoPedido } from '../services/socket.service';
 import { APP_CONSTANTS } from '../config/constants';
+import logo from '../assets/images/logo.webp';
 
 const { MODULOS } = APP_CONSTANTS;
 
@@ -191,11 +192,11 @@ const AdminLayout = () => {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo and Brand */}
                         <div className="flex items-center">
-                            <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
+                            <img 
+                                src={logo} 
+                                alt="Logo del Restaurante" 
+                                className="w-12 h-12 object-contain rounded-lg"
+                            />
                             <div className="ml-3">
                                 <h1 className="text-xl font-bold text-gray-900">Panel Admin</h1>
                                 <p className="text-xs text-gray-500">Gestión del Restaurante</p>

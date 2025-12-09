@@ -13,6 +13,10 @@ export const inventariosService = {
         return await http.get(`${API_CONFIG.ENDPOINTS.INVENTARIOS}/ingrediente/${ingredienteId}`);
     },
 
+    create: async (data) => {
+        return await http.post(API_CONFIG.ENDPOINTS.INVENTARIOS, data);
+    },
+
     update: async (id, data) => {
         return await http.put(`${API_CONFIG.ENDPOINTS.INVENTARIOS}/${id}`, data);
     },

@@ -342,6 +342,23 @@ function ProductosCliente() {
                 )}
             </div>
 
+            {/* Mensaje de agregado exitoso - Posición fija superior */}
+            {mensajeAgregado && (
+                <div className="fixed top-4 right-4 z-[60] animate-slide-in">
+                    <div className="bg-green-500 text-white rounded-lg shadow-2xl p-4 flex items-center gap-3 min-w-[300px]">
+                        <div className="bg-white rounded-full p-1">
+                            <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-semibold">¡Producto agregado!</p>
+                            <p className="text-sm text-green-100">Se añadió al carrito correctamente</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal de detalle del producto */}
             {productoSeleccionado && (
                 <div className="fixed inset-0 bg-linear-to-br from-orange-50/80 via-white/80 to-yellow-50/80 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={cerrarDetalleProducto}>
@@ -485,16 +502,6 @@ function ProductosCliente() {
                                     rows="3"
                                 />
                             </div>
-
-                            {/* Mensaje de agregado exitoso */}
-                            {mensajeAgregado && (
-                                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <p className="text-green-700 font-medium">¡Producto agregado al carrito!</p>
-                                </div>
-                            )}
 
                             {/* Información adicional */}
                             <div className="grid grid-cols-2 gap-4 bg-neutral-50 rounded-lg p-4">

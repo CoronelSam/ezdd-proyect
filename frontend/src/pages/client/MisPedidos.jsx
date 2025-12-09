@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import pedidosService from '../../services/pedidos.service';
 import { joinCliente, off, onEstadoPedido, onNuevoPedido, onPedidoCancelado } from '../../services/socket.service';
+import ModalConfirmacion from '../../components/ModalConfirmacion';
 
 const MisPedidos = () => {
     const { usuario } = useAuth();
@@ -10,6 +11,14 @@ const MisPedidos = () => {
     const [error, setError] = useState(null);
     const [filtroEstado, setFiltroEstado] = useState('todos');
     const [notificacion, setNotificacion] = useState(null);
+    const [actualizando, setActualizando] = useState(null);
+    const [modalConfirmacion, setModalConfirmacion] = useState({
+        mostrar: false,
+        tipo: 'peligro',
+        titulo: '',
+        mensaje: '',
+        onConfirmar: null
+    });
 
     useEffect(() => {
         cargarPedidos();
@@ -72,6 +81,36 @@ const MisPedidos = () => {
             off('pedido:cancelado', handlePedidoCancelado);
         };
     }, [usuario?.id_cliente]);
+
+    const handleCancelarPedido = (idPedido) => {
+        setModalConfirmacion({
+            mostrar: true,
+            tipo: 'peligro',
+            titulo: '¿Cancelar Pedido?',
+            mensaje: '¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.',
+            onConfirmar: () => {
+                cancelarPedido(idPedido);
+                setModalConfirmacion({ mostrar: false, tipo: 'peligro', titulo: '', mensaje: '', onConfirmar: null });
+            }
+        });
+    };
+
+    const cancelarPedido = async (idPedido) => {
+        try {
+            setActualizando(idPedido);
+            await pedidosService.updateEstado(idPedido, 'cancelado');
+            setNotificacion('✅ Pedido cancelado exitosamente');
+            setTimeout(() => setNotificacion(null), 3000);
+        } catch (err) {
+            console.error('Error al cancelar pedido:', err);
+            const errorMsg = err.response?.data?.mensaje || err.message || 'Error desconocido';
+            setNotificacion(`❌ Error al cancelar: ${errorMsg}`);
+            setTimeout(() => setNotificacion(null), 5000);
+            await cargarPedidos();
+        } finally {
+            setActualizando(null);
+        }
+    };
 
     const cargarPedidos = async () => {
         try {
@@ -359,6 +398,22 @@ const MisPedidos = () => {
                                             </div>
                                         </div>
 
+                                        {/* Botón de cancelar (solo para pedidos pendientes o en preparación) */}
+                                        {(pedido.estado === 'pendiente' || pedido.estado === 'en_preparacion') && (
+                                            <div className="mt-4">
+                                                <button
+                                                    onClick={() => handleCancelarPedido(pedido.id_pedido)}
+                                                    disabled={actualizando === pedido.id_pedido}
+                                                    className="w-full px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 active:scale-95 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    {actualizando === pedido.id_pedido ? 'Cancelando...' : 'Cancelar Pedido'}
+                                                </button>
+                                            </div>
+                                        )}
+
                                         {/* Línea de tiempo del estado */}
                                         <div className="mt-6 pt-4 border-t">
                                             <div className="flex justify-between items-center">
@@ -402,6 +457,15 @@ const MisPedidos = () => {
                     </div>
                 )}
             </div>
+
+            <ModalConfirmacion
+                mostrar={modalConfirmacion.mostrar}
+                tipo={modalConfirmacion.tipo}
+                onCancelar={() => setModalConfirmacion({ mostrar: false, tipo: 'peligro', titulo: '', mensaje: '', onConfirmar: null })}
+                onConfirmar={modalConfirmacion.onConfirmar}
+                titulo={modalConfirmacion.titulo}
+                mensaje={modalConfirmacion.mensaje}
+            />
         </div>
     );
 };

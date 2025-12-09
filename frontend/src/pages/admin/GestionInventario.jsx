@@ -33,6 +33,7 @@ const GestionInventario = () => {
         unidad_medida: '',
         precio_compra: '',
         stock_minimo: '',
+        cantidad_inicial: '',
         activo: true
     });
 
@@ -89,17 +90,33 @@ const GestionInventario = () => {
         e.preventDefault();
         try {
             if (inventarioSeleccionado) {
+                // Actualizar inventario existente
                 await inventariosService.update(inventarioSeleccionado.id_inventario, formDataInventario);
                 mostrarAlerta('Inventario actualizado exitosamente', 'success');
             } else {
-                await inventariosService.create(formDataInventario);
-                mostrarAlerta('Inventario creado exitosamente', 'success');
+                // Verificar si ya existe inventario para este ingrediente
+                const inventarioExistente = inventarios.find(
+                    inv => inv.id_ingrediente === parseInt(formDataInventario.id_ingrediente)
+                );
+                
+                if (inventarioExistente) {
+                    // Si existe, actualizar
+                    await inventariosService.update(inventarioExistente.id_inventario, {
+                        cantidad_actual: formDataInventario.cantidad_actual
+                    });
+                    mostrarAlerta('Inventario actualizado exitosamente', 'success');
+                } else {
+                    // Si no existe, crear nuevo
+                    await inventariosService.create(formDataInventario);
+                    mostrarAlerta('Inventario creado exitosamente', 'success');
+                }
             }
             await cargarDatos();
             cerrarModalInventario();
         } catch (error) {
             console.error('Error al guardar inventario:', error);
-            mostrarAlerta(error.message || 'Error al guardar el inventario', 'error');
+            const errorMsg = error.response?.data?.mensaje || error.message || 'Error al guardar el inventario';
+            mostrarAlerta(errorMsg, 'error');
         }
     };
 
@@ -111,7 +128,8 @@ const GestionInventario = () => {
                 await cargarDatos();
             } catch (error) {
                 console.error('Error al eliminar inventario:', error);
-                mostrarAlerta('Error al eliminar el inventario', 'error');
+                const errorMsg = error.response?.data?.mensaje || error.message || 'Error al eliminar el inventario';
+                mostrarAlerta(errorMsg, 'error');
             }
         }
     };
@@ -125,6 +143,7 @@ const GestionInventario = () => {
                 unidad_medida: ingrediente.unidad_medida,
                 precio_compra: ingrediente.precio_compra,
                 stock_minimo: ingrediente.stock_minimo,
+                cantidad_inicial: '',
                 activo: ingrediente.activo
             });
         } else {
@@ -134,6 +153,7 @@ const GestionInventario = () => {
                 unidad_medida: '',
                 precio_compra: '',
                 stock_minimo: '',
+                cantidad_inicial: '',
                 activo: true
             });
         }
@@ -149,17 +169,42 @@ const GestionInventario = () => {
         e.preventDefault();
         try {
             if (ingredienteSeleccionado) {
-                await ingredientesService.update(ingredienteSeleccionado.id_ingrediente, formDataIngrediente);
+                // Al actualizar, solo actualizamos el ingrediente
+                const { cantidad_inicial, ...ingredienteData } = formDataIngrediente;
+                await ingredientesService.update(ingredienteSeleccionado.id_ingrediente, ingredienteData);
                 mostrarAlerta('Ingrediente actualizado exitosamente', 'success');
             } else {
-                await ingredientesService.create(formDataIngrediente);
-                mostrarAlerta('Ingrediente creado exitosamente', 'success');
+                // Al crear nuevo ingrediente
+                const { cantidad_inicial, ...ingredienteData } = formDataIngrediente;
+                const nuevoIngrediente = await ingredientesService.create(ingredienteData);
+                
+                // Siempre crear el inventario, con la cantidad inicial o 0
+                const cantidadInicial = cantidad_inicial && parseFloat(cantidad_inicial) >= 0 
+                    ? parseFloat(cantidad_inicial) 
+                    : 0;
+                
+                try {
+                    await inventariosService.create({
+                        id_ingrediente: nuevoIngrediente.id_ingrediente,
+                        cantidad_actual: cantidadInicial
+                    });
+                    
+                    if (cantidadInicial > 0) {
+                        mostrarAlerta('Ingrediente e inventario creados exitosamente', 'success');
+                    } else {
+                        mostrarAlerta('Ingrediente creado con inventario en 0. Usa "Ajustar Inventario" para agregar stock.', 'success');
+                    }
+                } catch (invError) {
+                    console.error('Error al crear inventario:', invError);
+                    mostrarAlerta('Ingrediente creado, pero hubo un error al crear el inventario. Usa "Ajustar Inventario".', 'warning');
+                }
             }
             await cargarDatos();
             cerrarModalIngrediente();
         } catch (error) {
             console.error('Error al guardar ingrediente:', error);
-            mostrarAlerta(error.message || 'Error al guardar el ingrediente', 'error');
+            const errorMsg = error.response?.data?.mensaje || error.message || 'Error al guardar el ingrediente';
+            mostrarAlerta(errorMsg, 'error');
         }
     };
 
@@ -171,7 +216,8 @@ const GestionInventario = () => {
                 await cargarDatos();
             } catch (error) {
                 console.error('Error al eliminar ingrediente:', error);
-                mostrarAlerta('Error al eliminar el ingrediente', 'error');
+                const errorMsg = error.response?.data?.mensaje || error.message || 'Error al eliminar el ingrediente';
+                mostrarAlerta(errorMsg, 'error');
             }
         }
     };

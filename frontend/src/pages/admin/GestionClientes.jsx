@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { clientesService, pedidosService } from '../../services';
+import ModalConfirmacion from '../../components/ModalConfirmacion';
 
 const GestionClientes = () => {
     const [clientes, setClientes] = useState([]);
@@ -8,6 +9,14 @@ const GestionClientes = () => {
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [pedidosCliente, setPedidosCliente] = useState([]);
     const [modalPedidos, setModalPedidos] = useState(false);
+    const [actualizando, setActualizando] = useState(null);
+    const [modalConfirmacion, setModalConfirmacion] = useState({
+        mostrar: false,
+        tipo: 'advertencia',
+        titulo: '',
+        mensaje: '',
+        onConfirmar: null
+    });
 
     useEffect(() => {
         cargarClientes();
@@ -21,6 +30,35 @@ const GestionClientes = () => {
             console.error('Error al cargar clientes:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleToggleEstado = (cliente) => {
+        const nuevoEstado = !cliente.activo;
+        setModalConfirmacion({
+            mostrar: true,
+            tipo: 'advertencia',
+            titulo: nuevoEstado ? '¿Activar Cliente?' : '¿Desactivar Cliente?',
+            mensaje: nuevoEstado 
+                ? `¿Estás seguro de activar al cliente ${cliente.nombre}? Podrá realizar pedidos nuevamente.`
+                : `¿Estás seguro de desactivar al cliente ${cliente.nombre}? No podrá iniciar sesión ni realizar pedidos.`,
+            onConfirmar: () => {
+                toggleEstadoCliente(cliente.id_cliente, nuevoEstado);
+                setModalConfirmacion({ mostrar: false, tipo: 'advertencia', titulo: '', mensaje: '', onConfirmar: null });
+            }
+        });
+    };
+
+    const toggleEstadoCliente = async (idCliente, nuevoEstado) => {
+        try {
+            setActualizando(idCliente);
+            await clientesService.update(idCliente, { activo: nuevoEstado });
+            await cargarClientes();
+        } catch (error) {
+            console.error('Error al actualizar estado:', error);
+            alert('Error al actualizar el estado del cliente');
+        } finally {
+            setActualizando(null);
         }
     };
 
@@ -182,8 +220,15 @@ const GestionClientes = () => {
                                                 </div>
                                             </div>
                                             <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {cliente.nombre}
+                                                <div className="flex items-center gap-2">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {cliente.nombre}
+                                                    </div>
+                                                    {!cliente.activo && (
+                                                        <span className="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded">
+                                                            Inactivo
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="text-sm text-gray-500">
                                                     ID: {cliente.id_cliente}
@@ -203,12 +248,43 @@ const GestionClientes = () => {
                                         {new Date(cliente.fecha_registro).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => verPedidosCliente(cliente)}
-                                            className="text-blue-600 hover:text-blue-900"
-                                        >
-                                            Ver Pedidos
-                                        </button>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button
+                                                onClick={() => verPedidosCliente(cliente)}
+                                                className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                                </svg>
+                                                Ver Pedidos
+                                            </button>
+                                            <button
+                                                onClick={() => handleToggleEstado(cliente)}
+                                                disabled={actualizando === cliente.id_cliente}
+                                                className={`flex items-center gap-1 ${
+                                                    cliente.activo 
+                                                        ? 'text-red-600 hover:text-red-900' 
+                                                        : 'text-green-600 hover:text-green-900'
+                                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                title={cliente.activo ? 'Desactivar' : 'Activar'}
+                                            >
+                                                {cliente.activo ? (
+                                                    <>
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                        </svg>
+                                                        Desactivar
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        Activar
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -306,6 +382,15 @@ const GestionClientes = () => {
                     </div>
                 </div>
             )}
+
+            <ModalConfirmacion
+                mostrar={modalConfirmacion.mostrar}
+                tipo={modalConfirmacion.tipo}
+                onCancelar={() => setModalConfirmacion({ mostrar: false, tipo: 'advertencia', titulo: '', mensaje: '', onConfirmar: null })}
+                onConfirmar={modalConfirmacion.onConfirmar}
+                titulo={modalConfirmacion.titulo}
+                mensaje={modalConfirmacion.mensaje}
+            />
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { pedidosService } from '../../services';
 import { joinAdmin, onNuevoPedido, onEstadoPedido, onPedidoCancelado, off } from '../../services/socket.service';
+import ModalConfirmacion from '../../components/ModalConfirmacion';
 
 //Panel para visualizar y gestionar el estado de las órdenes
 function GestionPedidos() {
@@ -9,8 +10,16 @@ function GestionPedidos() {
     const [error, setError] = useState(null);
     const [filtroEstado, setFiltroEstado] = useState('todos');
     const [filtroFecha, setFiltroFecha] = useState('hoy');
+    const [fechaEspecifica, setFechaEspecifica] = useState('');
     const [actualizando, setActualizando] = useState(null);
     const [pedidosExpandidos, setPedidosExpandidos] = useState({});
+    const [modalConfirmacion, setModalConfirmacion] = useState({
+        mostrar: false,
+        tipo: 'peligro',
+        titulo: '',
+        mensaje: '',
+        onConfirmar: null
+    });
 
     const estados = [
         { value: 'todos', label: 'Todos', color: 'gray' },
@@ -80,6 +89,19 @@ function GestionPedidos() {
         }
     };
 
+    const handleCancelarPedido = (idPedido) => {
+        setModalConfirmacion({
+            mostrar: true,
+            tipo: 'peligro',
+            titulo: '¿Cancelar Pedido?',
+            mensaje: '¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer y el inventario será revertido.',
+            onConfirmar: () => {
+                actualizarEstado(idPedido, 'cancelado');
+                setModalConfirmacion({ mostrar: false, tipo: 'peligro', titulo: '', mensaje: '', onConfirmar: null });
+            }
+        });
+    };
+
     const actualizarEstado = async (idPedido, nuevoEstado) => {
         try {
             setActualizando(idPedido);
@@ -89,7 +111,7 @@ function GestionPedidos() {
             console.error('Error al actualizar estado:', err);
             // Si hay error, mostrar más detalles
             const errorMsg = err.response?.data?.mensaje || err.message || 'Error desconocido';
-            alert(`No se pudo actualizar el estado del pedido: ${errorMsg}`);
+            setError(`No se pudo actualizar el estado del pedido: ${errorMsg}`);
             // Si falla, recargar para tener la información correcta
             await cargarPedidos();
         } finally {
@@ -149,6 +171,13 @@ function GestionPedidos() {
         hace30Dias.setDate(hace30Dias.getDate() - 30);
 
         switch (filtroFecha) {
+            case 'especifica':
+                if (!fechaEspecifica) return pedidos;
+                return pedidos.filter(p => {
+                    const fechaPedido = obtenerFechaSinHora(p.fecha_pedido);
+                    const fechaSeleccionada = obtenerFechaSinHora(new Date(fechaEspecifica));
+                    return fechaPedido.getTime() === fechaSeleccionada.getTime();
+                });
             case 'hoy':
                 return pedidos.filter(p => {
                     const fechaPedido = obtenerFechaSinHora(p.fecha_pedido);
@@ -198,8 +227,8 @@ function GestionPedidos() {
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <h1 className="font-display text-4xl text-brand-700 mb-2">Gestión de Pedidos</h1>
-                    <p className="text-neutral-600">Administra el estado de las órdenes en tiempo real</p>
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-600 mb-2">Gestión de Pedidos</h1>
+                    <p className="text-gray-600">Administra el estado de las órdenes en tiempo real</p>
                 </div>
             </header>
 
@@ -208,17 +237,18 @@ function GestionPedidos() {
                 {/* Filtro por Fecha */}
                 <div className="bg-white rounded-xl shadow-md p-6 mb-4">
                     <div className="flex items-center gap-3 mb-3">
-                        <svg className="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <h3 className="text-sm font-semibold text-gray-700">Filtrar por Fecha</h3>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                         {[
                             { value: 'hoy', label: 'Hoy' },
                             { value: 'ayer', label: 'Ayer' },
                             { value: 'semana', label: 'Última Semana' },
                             { value: 'mes', label: 'Último Mes' },
+                            { value: 'especifica', label: 'Fecha Específica' },
                             { value: 'todos', label: 'Todos' }
                         ].map((opcion) => {
                             const hoy = new Date();
@@ -256,6 +286,14 @@ function GestionPedidos() {
                                         return fechaPedido >= obtenerFecha(hace30Dias) && fechaPedido <= hoyFecha;
                                     }).length;
                                     break;
+                                case 'especifica':
+                                    if (!fechaEspecifica) {
+                                        cantidad = 0;
+                                    } else {
+                                        const fechaSeleccionada = obtenerFecha(new Date(fechaEspecifica));
+                                        cantidad = pedidos.filter(p => obtenerFecha(p.fecha_pedido).getTime() === fechaSeleccionada.getTime()).length;
+                                    }
+                                    break;
                                 case 'todos':
                                     cantidad = pedidos.length;
                                     break;
@@ -267,15 +305,15 @@ function GestionPedidos() {
                                     onClick={() => setFiltroFecha(opcion.value)}
                                     className={`px-4 py-2 rounded-lg font-medium transition ${
                                         filtroFecha === opcion.value
-                                            ? 'bg-brand-600 text-white'
+                                            ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md'
                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 >
                                     {opcion.label}
                                     <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
                                         filtroFecha === opcion.value
-                                            ? 'bg-white text-brand-600'
-                                            : 'bg-brand-100 text-brand-700'
+                                            ? 'bg-white text-orange-600'
+                                            : 'bg-orange-100 text-orange-700'
                                     }`}>
                                         {cantidad}
                                     </span>
@@ -283,12 +321,31 @@ function GestionPedidos() {
                             );
                         })}
                     </div>
+                    {filtroFecha === 'especifica' && (
+                        <div className="mt-4 flex items-center gap-3">
+                            <label className="text-sm font-medium text-gray-700">Seleccionar fecha:</label>
+                            <input
+                                type="date"
+                                value={fechaEspecifica}
+                                onChange={(e) => setFechaEspecifica(e.target.value)}
+                                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition"
+                            />
+                            {fechaEspecifica && (
+                                <button
+                                    onClick={() => setFechaEspecifica('')}
+                                    className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                                >
+                                    Limpiar
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Filtro por Estado */}
                 <div className="bg-white rounded-xl shadow-md p-6 mb-8">
                     <div className="flex items-center gap-3 mb-3">
-                        <svg className="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <h3 className="text-sm font-semibold text-gray-700">Filtrar por Estado</h3>
@@ -305,15 +362,15 @@ function GestionPedidos() {
                                     onClick={() => setFiltroEstado(estado.value)}
                                     className={`px-4 py-2 rounded-lg font-medium transition ${
                                         filtroEstado === estado.value
-                                            ? 'bg-brand-500 text-white'
-                                            : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                                            ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 >
                                     {estado.label}
                                     <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
                                         filtroEstado === estado.value
-                                            ? 'bg-white text-brand-600'
-                                            : 'bg-brand-100 text-brand-700'
+                                            ? 'bg-white text-orange-600'
+                                            : 'bg-orange-100 text-orange-700'
                                     }`}>
                                         {cantidad}
                                     </span>
@@ -536,7 +593,7 @@ function GestionPedidos() {
                                                 )}
                                                 {pedido.estado !== 'cancelado' && (
                                                     <button
-                                                        onClick={() => actualizarEstado(pedido.id_pedido, 'cancelado')}
+                                                        onClick={() => handleCancelarPedido(pedido.id_pedido)}
                                                         disabled={actualizando === pedido.id_pedido}
                                                         className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 active:scale-95 transition-all text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                                                     >
@@ -555,6 +612,15 @@ function GestionPedidos() {
                     </div>
                 )}
             </div>
+
+            <ModalConfirmacion
+                mostrar={modalConfirmacion.mostrar}
+                tipo={modalConfirmacion.tipo}
+                onCancelar={() => setModalConfirmacion({ mostrar: false, tipo: 'peligro', titulo: '', mensaje: '', onConfirmar: null })}
+                onConfirmar={modalConfirmacion.onConfirmar}
+                titulo={modalConfirmacion.titulo}
+                mensaje={modalConfirmacion.mensaje}
+            />
         </div>
     );
 }
