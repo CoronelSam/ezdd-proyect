@@ -204,37 +204,64 @@ const seedDatabase = async () => {
     ]);
     console.log(`✓ ${ingredientes.length} ingredientes creados.`);
 
-    // Crear recetas
+    // Crear recetas vinculadas a precios específicos (presentaciones)
     const recetas = await Receta.bulkCreate([
-      // Ensalada César (producto 1)
-      { id_producto: 1, id_ingrediente: 5, cantidad_necesaria: 0.33 }, // Lechuga 
-      { id_producto: 1, id_ingrediente: 6, cantidad_necesaria: 0.11 }, // Tomate 
-      { id_producto: 1, id_ingrediente: 13, cantidad_necesaria: 0.04 }, // Queso
+      // Ensalada César - Porción individual (id_precio: 1)
+      { id_precio: 1, id_ingrediente: 5, cantidad_necesaria: 0.33 }, // Lechuga 
+      { id_precio: 1, id_ingrediente: 6, cantidad_necesaria: 0.11 }, // Tomate 
+      { id_precio: 1, id_ingrediente: 13, cantidad_necesaria: 0.04 }, // Queso
       
-      // Sopa de Tomate (producto 2)
-      { id_producto: 2, id_ingrediente: 6, cantidad_necesaria: 0.66 }, // Tomate
-      { id_producto: 2, id_ingrediente: 8, cantidad_necesaria: 0.10 }, // Crema
-      { id_producto: 2, id_ingrediente: 4, cantidad_necesaria: 0.01 }, // Sal
+      // Sopa de Tomate - Porción individual (id_precio: 2)
+      { id_precio: 2, id_ingrediente: 6, cantidad_necesaria: 0.66 }, // Tomate
+      { id_precio: 2, id_ingrediente: 8, cantidad_necesaria: 0.10 }, // Crema
+      { id_precio: 2, id_ingrediente: 4, cantidad_necesaria: 0.01 }, // Sal
       
-      // Pollo Frito (producto 3) - por cada 3 piezas
-      { id_producto: 3, id_ingrediente: 1, cantidad_necesaria: 1.10 }, // Pollo 
-      { id_producto: 3, id_ingrediente: 2, cantidad_necesaria: 0.22 }, // Harina 
-      { id_producto: 3, id_ingrediente: 3, cantidad_necesaria: 0.20 }, // Aceite 
-      { id_producto: 3, id_ingrediente: 4, cantidad_necesaria: 0.02 }, // Sal 
+      // Pollo Frito - 3 Piezas (id_precio: 3)
+      { id_precio: 3, id_ingrediente: 1, cantidad_necesaria: 1.10 }, // Pollo 
+      { id_precio: 3, id_ingrediente: 2, cantidad_necesaria: 0.22 }, // Harina 
+      { id_precio: 3, id_ingrediente: 3, cantidad_necesaria: 0.20 }, // Aceite 
+      { id_precio: 3, id_ingrediente: 4, cantidad_necesaria: 0.02 }, // Sal 
       
-      // Pasta Alfredo (producto 4)
-      { id_producto: 4, id_ingrediente: 7, cantidad_necesaria: 0.44 }, // Pasta 
-      { id_producto: 4, id_ingrediente: 8, cantidad_necesaria: 0.15 }, // Crema 
-      { id_producto: 4, id_ingrediente: 13, cantidad_necesaria: 0.11 }, // Queso 
-      { id_producto: 4, id_ingrediente: 14, cantidad_necesaria: 0.04 }, // Mantequilla 
+      // Pollo Frito - 6 Piezas (id_precio: 4)
+      { id_precio: 4, id_ingrediente: 1, cantidad_necesaria: 2.20 }, // Pollo (doble)
+      { id_precio: 4, id_ingrediente: 2, cantidad_necesaria: 0.44 }, // Harina (doble)
+      { id_precio: 4, id_ingrediente: 3, cantidad_necesaria: 0.40 }, // Aceite (doble)
+      { id_precio: 4, id_ingrediente: 4, cantidad_necesaria: 0.04 }, // Sal (doble)
       
-      // Café (producto 6) - por taza
-      { id_producto: 6, id_ingrediente: 9, cantidad_necesaria: 0.03 }, // Café en grano 
+      // Pollo Frito - 9 Piezas (id_precio: 5)
+      { id_precio: 5, id_ingrediente: 1, cantidad_necesaria: 3.30 }, // Pollo (triple)
+      { id_precio: 5, id_ingrediente: 2, cantidad_necesaria: 0.66 }, // Harina (triple)
+      { id_precio: 5, id_ingrediente: 3, cantidad_necesaria: 0.60 }, // Aceite (triple)
+      { id_precio: 5, id_ingrediente: 4, cantidad_necesaria: 0.06 }, // Sal (triple)
       
-      // Jugo de Naranja (producto 7)
-      { id_producto: 7, id_ingrediente: 10, cantidad_necesaria: 0.66 } // Naranja
+      // Pollo Frito - 12 Piezas (id_precio: 6)
+      { id_precio: 6, id_ingrediente: 1, cantidad_necesaria: 4.40 }, // Pollo (cuádruple)
+      { id_precio: 6, id_ingrediente: 2, cantidad_necesaria: 0.88 }, // Harina (cuádruple)
+      { id_precio: 6, id_ingrediente: 3, cantidad_necesaria: 0.80 }, // Aceite (cuádruple)
+      { id_precio: 6, id_ingrediente: 4, cantidad_necesaria: 0.08 }, // Sal (cuádruple)
+      
+      // Pasta Alfredo - Porción individual (id_precio: 7)
+      { id_precio: 7, id_ingrediente: 7, cantidad_necesaria: 0.44 }, // Pasta 
+      { id_precio: 7, id_ingrediente: 8, cantidad_necesaria: 0.15 }, // Crema 
+      { id_precio: 7, id_ingrediente: 13, cantidad_necesaria: 0.11 }, // Queso 
+      { id_precio: 7, id_ingrediente: 14, cantidad_necesaria: 0.04 }, // Mantequilla 
+      
+      // Tiramisú - Porción individual (id_precio: 8)
+      // (Sin receta de ingredientes por ahora)
+      
+      // Café - Chico 8oz (id_precio: 9)
+      { id_precio: 9, id_ingrediente: 9, cantidad_necesaria: 0.03 }, // Café en grano 
+      
+      // Café - Mediano 12oz (id_precio: 10)
+      { id_precio: 10, id_ingrediente: 9, cantidad_necesaria: 0.045 }, // Café en grano (1.5x)
+      
+      // Café - Grande 16oz (id_precio: 11)
+      { id_precio: 11, id_ingrediente: 9, cantidad_necesaria: 0.06 }, // Café en grano (2x)
+      
+      // Jugo de Naranja - Vaso 16oz (id_precio: 12)
+      { id_precio: 12, id_ingrediente: 10, cantidad_necesaria: 0.66 } // Naranja
     ]);
-    console.log(`✓ ${recetas.length} recetas creadas.`);
+    console.log(`✓ ${recetas.length} recetas creadas (vinculadas a presentaciones específicas).`);
 
     // Crear inventarios
     const inventarios = await Inventario.bulkCreate([

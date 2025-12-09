@@ -5,9 +5,9 @@ const { body, param, query } = require('express-validator');
 
 // Validaciones
 const validacionCrear = [
-  body('id_producto')
-    .notEmpty().withMessage('El ID del producto es requerido')
-    .isInt({ min: 1 }).withMessage('El ID del producto debe ser un número entero positivo'),
+  body('id_precio')
+    .notEmpty().withMessage('El ID del precio/presentación es requerido')
+    .isInt({ min: 1 }).withMessage('El ID del precio debe ser un número entero positivo'),
   body('id_ingrediente')
     .notEmpty().withMessage('El ID del ingrediente es requerido')
     .isInt({ min: 1 }).withMessage('El ID del ingrediente debe ser un número entero positivo'),
@@ -49,10 +49,19 @@ const validacionIdIngrediente = [
     .isInt({ min: 1 }).withMessage('El ID del ingrediente debe ser un número entero positivo')
 ];
 
+const validacionIdPrecio = [
+  param('idPrecio')
+    .isInt({ min: 1 }).withMessage('El ID del precio debe ser un número entero positivo')
+];
+
 // Rutas
 router.post('/', validacionCrear, RecetaController.crear);
 router.post('/duplicar', validacionDuplicar, RecetaController.duplicar);
 router.get('/', RecetaController.obtenerTodas);
+// Nuevas rutas para precios/presentaciones
+router.get('/precio/:idPrecio', validacionIdPrecio, RecetaController.obtenerPorPrecio);
+router.get('/precio/:idPrecio/costo', validacionIdPrecio, RecetaController.calcularCostoPorPrecio);
+// Rutas existentes (mantener compatibilidad)
 router.get('/producto/:idProducto', validacionIdProducto, RecetaController.obtenerPorProducto);
 router.get('/producto/:idProducto/costo', validacionIdProducto, RecetaController.calcularCosto);
 router.get('/ingrediente/:idIngrediente', validacionIdIngrediente, RecetaController.obtenerPorIngrediente);

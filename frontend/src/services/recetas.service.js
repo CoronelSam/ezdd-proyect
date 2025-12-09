@@ -22,6 +22,11 @@ export const recetasService = {
         return Array.isArray(response) ? response : (response.recetas || []);
     },
 
+    getByPrecio: async (idPrecio) => {
+        const response = await http.get(`${API_CONFIG.ENDPOINTS.RECETAS}/precio/${idPrecio}`);
+        return Array.isArray(response) ? response : (response.recetas || []);
+    },
+
     getByIngrediente: async (idIngrediente) => {
         const response = await http.get(`${API_CONFIG.ENDPOINTS.RECETAS}/ingrediente/${idIngrediente}`);
         return Array.isArray(response) ? response : (response.recetas || []);

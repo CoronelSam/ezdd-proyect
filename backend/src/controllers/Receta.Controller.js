@@ -45,6 +45,21 @@ class RecetaController {
     }
   }
 
+  async obtenerPorPrecio(req, res) {
+    try {
+      const recetas = await RecetaService.obtenerRecetasPorPrecio(req.params.idPrecio);
+      res.status(200).json(recetas);
+    } catch (error) {
+      if (error.message === 'Presentación/Precio no encontrado') {
+        return res.status(404).json({ mensaje: error.message });
+      }
+      res.status(500).json({
+        mensaje: 'Error al obtener las recetas de la presentación',
+        error: error.message
+      });
+    }
+  }
+
   async obtenerPorProducto(req, res) {
     try {
       const recetas = await RecetaService.obtenerRecetasPorProducto(req.params.idProducto);
@@ -126,6 +141,18 @@ class RecetaController {
       }
       res.status(500).json({
         mensaje: 'Error al eliminar la receta',
+        error: error.message
+      });
+    }
+  }
+
+  async calcularCostoPorPrecio(req, res) {
+    try {
+      const costo = await RecetaService.calcularCostoProduccionPorPrecio(req.params.idPrecio);
+      res.status(200).json(costo);
+    } catch (error) {
+      res.status(500).json({
+        mensaje: 'Error al calcular el costo de producción de la presentación',
         error: error.message
       });
     }

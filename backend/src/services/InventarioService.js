@@ -297,14 +297,50 @@ class InventarioService {
   async validarStockParaPedido(detallesPedido) {
     try {
       const Receta = require('../models/RecetaModel');
+      const PrecioProducto = require('../models/PrecioProductoModel');
       const faltantes = [];
       let todoDisponible = true;
 
       const ingredientesNecesarios = {};
 
       for (const detalle of detallesPedido) {
+        let idPrecio = detalle.id_precio;
+        
+        // Si no se proporciona id_precio, buscar el precio por defecto del producto
+        if (!idPrecio) {
+          const precioDefault = await PrecioProducto.findOne({
+            where: { 
+              id_producto: detalle.id_producto,
+              es_default: true,
+              activo: true
+            }
+          });
+          
+          if (precioDefault) {
+            idPrecio = precioDefault.id_precio;
+          } else {
+            // Si no hay precio por defecto, buscar el primer precio activo
+            const primerPrecio = await PrecioProducto.findOne({
+              where: { 
+                id_producto: detalle.id_producto,
+                activo: true
+              }
+            });
+            if (primerPrecio) {
+              idPrecio = primerPrecio.id_precio;
+            }
+          }
+        }
+
+        // Si no se puede determinar un precio, continuar (no se puede validar stock)
+        if (!idPrecio) {
+          console.warn(`No se pudo determinar precio para producto ${detalle.id_producto}`);
+          continue;
+        }
+
+        // Buscar recetas por id_precio en lugar de id_producto
         const recetas = await Receta.findAll({
-          where: { id_producto: detalle.id_producto },
+          where: { id_precio: idPrecio },
           include: [{
             model: Ingrediente,
             as: 'ingrediente',
@@ -313,7 +349,7 @@ class InventarioService {
           }]
         });
 
-        // Si el producto no tiene recetas, continuar (no requiere inventario)
+        // Si la presentacion no tiene recetas, continuar (no requiere inventario)
         if (!recetas || recetas.length === 0) {
           continue;
         }
@@ -391,14 +427,51 @@ class InventarioService {
   async descontarIngredientesPorPedido(detallesPedido, idPedido = null) {
     try {
       const Receta = require('../models/RecetaModel');
+      const PrecioProducto = require('../models/PrecioProductoModel');
       const MovimientoInventario = require('../models/MovimientoInventarioModel');
       const movimientos = [];
 
       const ingredientesNecesarios = {};
 
       for (const detalle of detallesPedido) {
+        // Determinar el id_precio a usar
+        let idPrecio = detalle.id_precio;
+        
+        // Si no se proporciona id_precio, buscar el precio por defecto del producto
+        if (!idPrecio) {
+          const precioDefault = await PrecioProducto.findOne({
+            where: { 
+              id_producto: detalle.id_producto,
+              es_default: true,
+              activo: true
+            }
+          });
+          
+          if (precioDefault) {
+            idPrecio = precioDefault.id_precio;
+          } else {
+            // Si no hay precio por defecto, buscar el primer precio activo
+            const primerPrecio = await PrecioProducto.findOne({
+              where: { 
+                id_producto: detalle.id_producto,
+                activo: true
+              }
+            });
+            if (primerPrecio) {
+              idPrecio = primerPrecio.id_precio;
+            }
+          }
+        }
+
+        // Si no se puede determinar un precio, continuar
+        if (!idPrecio) {
+          console.warn(`No se pudo determinar precio para producto ${detalle.id_producto}`);
+          continue;
+        }
+
+        // Buscar recetas por id_precio en lugar de id_producto
         const recetas = await Receta.findAll({
-          where: { id_producto: detalle.id_producto },
+          where: { id_precio: idPrecio },
           include: [{
             model: Ingrediente,
             as: 'ingrediente',
@@ -407,7 +480,7 @@ class InventarioService {
           }]
         });
 
-        // Si el producto no tiene recetas, continuar
+        // Si la presentación no tiene recetas, continuar
         if (!recetas || recetas.length === 0) {
           continue;
         }
@@ -486,6 +559,7 @@ class InventarioService {
   async revertirDescuentoPorPedido(detallesPedido, idPedido = null) {
     try {
       const Receta = require('../models/RecetaModel');
+      const PrecioProducto = require('../models/PrecioProductoModel');
       const MovimientoInventario = require('../models/MovimientoInventarioModel');
       const movimientos = [];
 
@@ -493,8 +567,44 @@ class InventarioService {
       const ingredientesADevolver = {};
 
       for (const detalle of detallesPedido) {
+        // Determinar el id_precio a usar
+        let idPrecio = detalle.id_precio;
+        
+        // Si no se proporciona id_precio, buscar el precio por defecto del producto
+        if (!idPrecio) {
+          const precioDefault = await PrecioProducto.findOne({
+            where: { 
+              id_producto: detalle.id_producto,
+              es_default: true,
+              activo: true
+            }
+          });
+          
+          if (precioDefault) {
+            idPrecio = precioDefault.id_precio;
+          } else {
+            // Si no hay precio por defecto, buscar el primer precio activo
+            const primerPrecio = await PrecioProducto.findOne({
+              where: { 
+                id_producto: detalle.id_producto,
+                activo: true
+              }
+            });
+            if (primerPrecio) {
+              idPrecio = primerPrecio.id_precio;
+            }
+          }
+        }
+
+        // Si no se puede determinar un precio, continuar
+        if (!idPrecio) {
+          console.warn(`No se pudo determinar precio para producto ${detalle.id_producto}`);
+          continue;
+        }
+
+        // Buscar recetas por id_precio en lugar de id_producto
         const recetas = await Receta.findAll({
-          where: { id_producto: detalle.id_producto },
+          where: { id_precio: idPrecio },
           include: [{
             model: Ingrediente,
             as: 'ingrediente',
@@ -503,7 +613,7 @@ class InventarioService {
           }]
         });
 
-        // Si el producto no tiene recetas, continuar
+        // Si la presentación no tiene recetas, continuar
         if (!recetas || recetas.length === 0) {
           continue;
         }

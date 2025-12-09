@@ -8,15 +8,16 @@ const Receta = sequelize.define('Receta', {
     autoIncrement: true,
     allowNull: false
   },
-  id_producto: {
+  id_precio: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'productos',
-      key: 'id_producto'
+      model: 'precio_productos',
+      key: 'id_precio'
     },
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT'
+    onDelete: 'RESTRICT',
+    comment: 'Vincula la receta a una presentación específica del producto'
   },
   id_ingrediente: {
     type: DataTypes.INTEGER,
@@ -48,25 +49,25 @@ const Receta = sequelize.define('Receta', {
   updatedAt: 'actualizado_en',
   indexes: [
     {
-      fields: ['id_producto']
+      fields: ['id_precio']
     },
     {
       fields: ['id_ingrediente']
     },
     {
       unique: true,
-      fields: ['id_producto', 'id_ingrediente'],
-      name: 'unique_producto_ingrediente'
+      fields: ['id_precio', 'id_ingrediente'],
+      name: 'unique_precio_ingrediente'
     }
   ]
 });
 
 // Definir relaciones
 Receta.associate = (models) => {
-  // Una receta pertenece a un producto
-  Receta.belongsTo(models.Producto, {
-    foreignKey: 'id_producto',
-    as: 'producto'
+  // Una receta pertenece a una presentación/precio específico
+  Receta.belongsTo(models.PrecioProducto, {
+    foreignKey: 'id_precio',
+    as: 'precio'
   });
 
   // Una receta pertenece a un ingrediente
