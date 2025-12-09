@@ -154,6 +154,9 @@ class PedidoController {
       if (error.message.includes('no válido')) {
         return res.status(400).json({ mensaje: error.message });
       }
+      if (error.message.includes('Stock insuficiente') || error.message.includes('inventario')) {
+        return res.status(400).json({ mensaje: error.message });
+      }
       res.status(500).json({
         mensaje: 'Error al actualizar el estado del pedido',
         error: error.message,

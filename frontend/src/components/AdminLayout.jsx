@@ -20,7 +20,6 @@ const AdminLayout = () => {
 
         // Escuchar nuevos pedidos
         const handleNuevoPedido = (pedido) => {
-            console.log('🆕 Nuevo pedido recibido:', pedido);
             setNotificacionPedido({
                 tipo: 'nuevo',
                 mensaje: `Nuevo pedido #${pedido.id_pedido}`,
@@ -33,7 +32,6 @@ const AdminLayout = () => {
 
         // Escuchar cambios de estado
         const handleEstadoPedido = ({ id_pedido, estado }) => {
-            console.log('📝 Estado actualizado:', id_pedido, estado);
             setNotificacionPedido({
                 tipo: 'estado',
                 mensaje: `Pedido #${id_pedido}: ${estado}`,

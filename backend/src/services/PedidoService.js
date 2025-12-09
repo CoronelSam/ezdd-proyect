@@ -4,6 +4,7 @@ const Cliente = require('../models/ClienteModel');
 const Empleado = require('../models/EmpleadoModel');
 const Producto = require('../models/ProductoModel');
 const PrecioProducto = require('../models/PrecioProductoModel');
+const InventarioService = require('./InventarioService');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -41,6 +42,18 @@ class PedidoService {
       // Calcular total y validar productos
       let total = 0;
       const detallesValidados = [];
+
+      // Validar stock ANTES de crear el pedido
+      const validacionStock = await InventarioService.validarStockParaPedido(
+        data.detalles.map(d => ({ id_producto: d.id_producto, cantidad: d.cantidad }))
+      );
+
+      if (!validacionStock.disponible) {
+        const mensajeFaltantes = validacionStock.faltantes.map(f => 
+          `${f.nombre}: necesita ${f.cantidad_necesaria.toFixed(2)} ${f.unidad_medida}, disponible ${f.cantidad_disponible.toFixed(2)} ${f.unidad_medida} (falta ${f.cantidad_faltante.toFixed(2)} ${f.unidad_medida})`
+        ).join(', ');
+        throw new Error(`Stock insuficiente: ${mensajeFaltantes}`);
+      }
 
       for (const detalle of data.detalles) {
         const producto = await Producto.findByPk(detalle.id_producto);
@@ -97,7 +110,7 @@ class PedidoService {
 
       await transaction.commit();
 
-      // Obtener el pedido completo DESPUÉS del commit
+      // Obtener el pedido completo
       try {
         const pedidoCompleto = await this.obtenerPedidoPorId(pedido.id_pedido);
         return pedidoCompleto;
@@ -264,8 +277,16 @@ class PedidoService {
   }
 
   async actualizarEstado(id, estado) {
+    const transaction = await sequelize.transaction();
+    
     try {
-      const pedido = await Pedido.findByPk(id);
+      const pedido = await Pedido.findByPk(id, {
+        include: [{
+          model: DetallePedido,
+          as: 'detalles',
+          attributes: ['id_producto', 'cantidad']
+        }]
+      });
 
       if (!pedido) {
         throw new Error('Pedido no encontrado');
@@ -276,9 +297,44 @@ class PedidoService {
         throw new Error('Estado no válido');
       }
 
-      await pedido.update({ estado });
+      const estadoAnterior = pedido.estado;
+      // Descontar inventario cuando se confirma o inicia preparación
+      if ((estado === 'en_preparacion') && 
+          (estadoAnterior === 'pendiente')) {
+        
+        // Validar stock antes de descontar
+        const validacionStock = await InventarioService.validarStockParaPedido(
+          pedido.detalles.map(d => ({ id_producto: d.id_producto, cantidad: d.cantidad }))
+        );
 
-      // Devolver el pedido actualizado simple primero para debug
+        if (!validacionStock.disponible) {
+          const mensajeFaltantes = validacionStock.faltantes.map(f => 
+            `${f.nombre}: necesita ${f.cantidad_necesaria.toFixed(2)} ${f.unidad_medida}, disponible ${f.cantidad_disponible.toFixed(2)} ${f.unidad_medida}`
+          ).join(', ');
+          throw new Error(`Stock insuficiente para procesar el pedido: ${mensajeFaltantes}`);
+        }
+
+        // Descontar ingredientes del inventario
+        await InventarioService.descontarIngredientesPorPedido(
+          pedido.detalles.map(d => ({ id_producto: d.id_producto, cantidad: d.cantidad })),
+          id
+        );
+      }
+
+      // Revertir inventario si se cancela un pedido que ya estaba en preparación
+      if (estado === 'cancelado' && 
+          (estadoAnterior === 'en_preparacion' || estadoAnterior === 'listo')) {
+        
+        await InventarioService.revertirDescuentoPorPedido(
+          pedido.detalles.map(d => ({ id_producto: d.id_producto, cantidad: d.cantidad })),
+          id
+        );
+      }
+
+      await pedido.update({ estado }, { transaction });
+      await transaction.commit();
+
+      // Devolver el pedido actualizado
       const pedidoActualizado = await Pedido.findByPk(id, {
         include: [
           {
@@ -291,6 +347,9 @@ class PedidoService {
 
       return pedidoActualizado;
     } catch (error) {
+      if (!transaction.finished) {
+        await transaction.rollback();
+      }
       console.error('Error en actualizarEstado service:', error);
       throw error;
     }

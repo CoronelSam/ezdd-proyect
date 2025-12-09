@@ -117,9 +117,18 @@ const syncDatabase = async () => {
     console.log('Verificando conexión a la base de datos...');
     await sequelize.authenticate();
     console.log('Conexión a la base de datos establecida correctamente.');
-    console.log('\nSincronizando modelos con la base de datos...');
-    await sequelize.sync({ alter: true });
-    console.log('Tablas sincronizadas correctamente.');
+    // Solo sincronizar sin alterar en produccion para evitar problemas con indices
+    // Usar migraciones para cambios en esquema
+    if (process.env.NODE_ENV === 'development' && process.env.SYNC_ALTER === 'true') {
+      console.log('\nSincronizando modelos con la base de datos (alter mode)...');
+      await sequelize.sync({ alter: true });
+      console.log('Tablas sincronizadas correctamente.');
+    } else {
+      console.log('\nValidando modelos (sin alterar tablas)...');
+      // Solo validar que las tablas existen, no alterarlas
+      await sequelize.sync({ force: false });
+      console.log('Validación de tablas completada.');
+    }
 
     return true;
   } catch (error) {

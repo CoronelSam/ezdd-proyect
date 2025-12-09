@@ -12,7 +12,6 @@ const UsuarioSistema = sequelize.define('UsuarioSistema', {
   empleado_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true,
     references: {
       model: 'empleados',
       key: 'id_empleado'
@@ -23,7 +22,6 @@ const UsuarioSistema = sequelize.define('UsuarioSistema', {
   username: {
     type: DataTypes.STRING(50),
     allowNull: false,
-    unique: true,
     validate: {
       len: {
         args: [3, 50],

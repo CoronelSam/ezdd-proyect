@@ -25,7 +25,6 @@ const MisPedidos = () => {
         // Manejar nuevo pedido
         const handleNuevoPedido = (pedido) => {
             if (pedido.id_cliente === usuario.id_cliente) {
-                console.log('🆕 Nuevo pedido recibido:', pedido);
                 setPedidos((prev) => [pedido, ...prev]);
                 setNotificacion('¡Pedido creado exitosamente!');
                 setTimeout(() => setNotificacion(null), 3000);
@@ -34,7 +33,6 @@ const MisPedidos = () => {
 
         // Manejar cambio de estado
         const handleEstadoPedido = ({ id_pedido, estado, pedido }) => {
-            console.log('📝 Estado actualizado:', id_pedido, estado);
             setPedidos((prev) =>
                 prev.map((p) => 
                     p.id_pedido === id_pedido 
@@ -55,7 +53,6 @@ const MisPedidos = () => {
 
         // Manejar cancelación
         const handlePedidoCancelado = ({ id_pedido }) => {
-            console.log('❌ Pedido cancelado:', id_pedido);
             setPedidos((prev) =>
                 prev.map((p) => 
                     p.id_pedido === id_pedido ? { ...p, estado: 'cancelado' } : p
