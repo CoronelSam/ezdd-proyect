@@ -36,6 +36,9 @@ const authService = {
             const response = await http.post(`${API_CONFIG.ENDPOINTS.CLIENTES}/login`, { email, clave });
             
             if (response.token && response.cliente) {
+                // Limpiar tokens de empleado antes de guardar los de cliente
+                localStorage.removeItem('token');
+                
                 // Guardar tokens JWT del cliente
                 localStorage.setItem('clienteToken', response.token);
                 localStorage.setItem('clienteRefreshToken', response.refreshToken);
@@ -110,6 +113,11 @@ const authService = {
             const response = await http.post(`${API_CONFIG.ENDPOINTS.USUARIOS}/login`, { username, password });
             
             if (response.token && response.usuario) {
+                // Limpiar tokens de cliente antes de guardar los de empleado
+                localStorage.removeItem('clienteToken');
+                localStorage.removeItem('clienteRefreshToken');
+                localStorage.removeItem('id_cliente');
+                
                 // Guardar token
                 localStorage.setItem('token', response.token);
                 

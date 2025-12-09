@@ -14,8 +14,8 @@ const Contacto = () => {
     
     const [formPerfil, setFormPerfil] = useState({
         nombre: '',
-        telefono: '',
-        direccion: ''
+        email: '',
+        telefono: ''
     });
 
     const [formClave, setFormClave] = useState({
@@ -32,8 +32,8 @@ const Contacto = () => {
         if (perfil) {
             setFormPerfil({
                 nombre: perfil.nombre || '',
-                telefono: perfil.telefono || '',
-                direccion: perfil.direccion || ''
+                email: perfil.email || '',
+                telefono: perfil.telefono || ''
             });
         }
     }, [perfil]);
@@ -67,8 +67,8 @@ const Contacto = () => {
                 // Actualizar el contexto de autenticación con los nuevos datos
                 actualizarUsuario({
                     nombre: resultado.data.nombre,
-                    telefono: resultado.data.telefono,
-                    direccion: resultado.data.direccion
+                    email: resultado.data.email,
+                    telefono: resultado.data.telefono
                 });
                 
                 setExito(resultado.mensaje || 'Perfil actualizado exitosamente');
@@ -201,12 +201,6 @@ const Contacto = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-500 mb-1">
-                                        Dirección
-                                    </label>
-                                    <p className="text-gray-900 font-medium">{perfil?.direccion || 'No registrada'}</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-500 mb-1">
                                         Estado
                                     </label>
                                     <p className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -233,6 +227,19 @@ const Contacto = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Email *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        required
+                                        value={formPerfil.email}
+                                        onChange={handlePerfilChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Teléfono
                                     </label>
                                     <input
@@ -243,18 +250,6 @@ const Contacto = () => {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Dirección
-                                    </label>
-                                    <textarea
-                                        name="direccion"
-                                        value={formPerfil.direccion}
-                                        onChange={handlePerfilChange}
-                                        rows={3}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                    />
-                                </div>
                                 <div className="flex gap-3 pt-2">
                                     <button
                                         type="button"
@@ -262,8 +257,8 @@ const Contacto = () => {
                                             setEditandoPerfil(false);
                                             setFormPerfil({
                                                 nombre: perfil?.nombre || '',
-                                                telefono: perfil?.telefono || '',
-                                                direccion: perfil?.direccion || ''
+                                                email: perfil?.email || '',
+                                                telefono: perfil?.telefono || ''
                                             });
                                         }}
                                         className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"

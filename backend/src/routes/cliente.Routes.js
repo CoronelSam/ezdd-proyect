@@ -106,14 +106,16 @@ const validacionActualizarPerfil = [
     .trim()
     .isLength({ min: 2, max: 100 }).withMessage('El nombre debe tener entre 2 y 100 caracteres'),
   
+  body('email')
+    .optional()
+    .trim()
+    .isEmail().withMessage('Debe proporcionar un email válido')
+    .normalizeEmail(),
+  
   body('telefono')
     .optional()
     .trim()
-    .matches(/^[0-9+\-\s()]*$/).withMessage('El teléfono debe contener solo números y símbolos válidos'),
-  
-  body('direccion')
-    .optional()
-    .trim()
+    .matches(/^[0-9+\-\s()]*$/).withMessage('El teléfono debe contener solo números y símbolos válidos')
 ];
 
 // === RUTAS PÚBLICAS (sin autenticación) ===

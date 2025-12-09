@@ -12,17 +12,31 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use(
     (config) => {
-        // Prioridad: token de empleado/usuario del sistema
-        const tokenEmpleado = localStorage.getItem('token');
-        if (tokenEmpleado) {
-            config.headers.Authorization = `Bearer ${tokenEmpleado}`;
-            return config;
+        // Detectar el tipo de usuario actualmente autenticado
+        const usuarioStr = localStorage.getItem('usuario');
+        let tipoUsuario = null;
+        
+        if (usuarioStr) {
+            try {
+                const usuario = JSON.parse(usuarioStr);
+                tipoUsuario = usuario.tipo;
+            } catch (e) {
+                console.error('Error al parsear usuario:', e);
+            }
         }
         
-        // Fallback: token de cliente
-        const tokenCliente = localStorage.getItem('clienteToken');
-        if (tokenCliente) {
-            config.headers.Authorization = `Bearer ${tokenCliente}`;
+        // Usar el token apropiado según el tipo de usuario
+        if (tipoUsuario === 'cliente') {
+            const tokenCliente = localStorage.getItem('clienteToken');
+            if (tokenCliente) {
+                config.headers.Authorization = `Bearer ${tokenCliente}`;
+            }
+        } else {
+            // Para empleados/usuarios del sistema o sin tipo definido
+            const tokenEmpleado = localStorage.getItem('token');
+            if (tokenEmpleado) {
+                config.headers.Authorization = `Bearer ${tokenEmpleado}`;
+            }
         }
         
         return config;
