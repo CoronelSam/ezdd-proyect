@@ -5,8 +5,8 @@ import { API_CONFIG } from '../config/api';
  * Servicio para gestionar productos
  */
 export const productosService = {
-    getAll: async () => {
-        const response = await http.get(API_CONFIG.ENDPOINTS.PRODUCTOS);
+    getAll: async (params = {}) => {
+        const response = await http.get(API_CONFIG.ENDPOINTS.PRODUCTOS, { params });
         return response.productos || [];
     },
 

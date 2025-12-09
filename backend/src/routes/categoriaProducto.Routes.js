@@ -10,7 +10,7 @@ const validacionCrear = [
     .isLength({ min: 2, max: 50 }).withMessage('El nombre debe tener entre 2 y 50 caracteres'),
   
   body('descripcion')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
 ];
 
@@ -19,12 +19,12 @@ const validacionActualizar = [
     .isInt({ min: 1 }).withMessage('ID inválido'),
   
   body('nombre')
-    .optional()
     .trim()
+    .notEmpty().withMessage('El nombre es requerido')
     .isLength({ min: 2, max: 50 }).withMessage('El nombre debe tener entre 2 y 50 caracteres'),
   
   body('descripcion')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim(),
   
   body('activa')

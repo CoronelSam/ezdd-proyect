@@ -22,6 +22,8 @@ const GestionUsuarios = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
+        passwordConfirmar: '',
+        passwordActual: '',
         rol: 'empleado',
         activo: true
     });
@@ -64,6 +66,8 @@ const GestionUsuarios = () => {
             setFormData({
                 username: usuario.username,
                 password: '',
+                passwordConfirmar: '',
+                passwordActual: '',
                 rol: usuario.rol,
                 activo: usuario.activo
             });
@@ -72,6 +76,8 @@ const GestionUsuarios = () => {
             setFormData({
                 username: '',
                 password: '',
+                passwordConfirmar: '',
+                passwordActual: '',
                 rol: 'empleado',
                 activo: true
             });
@@ -115,10 +121,37 @@ const GestionUsuarios = () => {
 
         try {
             if (usuarioSeleccionado) {
-                const dataToSend = { ...formData };
-                if (!dataToSend.password) {
-                    delete dataToSend.password;
+                // Al editar, si se cambia la contraseña
+                if (formData.password) {
+                    // Validar que la contraseña tenga al menos 6 caracteres
+                    if (formData.password.length < 6) {
+                        setError('La nueva contraseña debe tener al menos 6 caracteres');
+                        return;
+                    }
+                    // Validar que las contraseñas coincidan
+                    if (formData.password !== formData.passwordConfirmar) {
+                        setError('Las contraseñas no coinciden');
+                        return;
+                    }
+                    // Validar que se haya ingresado la contraseña actual
+                    if (!formData.passwordActual) {
+                        setError('Debes ingresar tu contraseña actual para cambiarla');
+                        return;
+                    }
                 }
+                
+                const dataToSend = { 
+                    username: formData.username,
+                    rol: formData.rol,
+                    activo: formData.activo
+                };
+                
+                // Si se está cambiando la contraseña, incluir los datos
+                if (formData.password) {
+                    dataToSend.password = formData.password;
+                    dataToSend.password_actual = formData.passwordActual;
+                }
+                
                 await usuariosService.update(usuarioSeleccionado.usuario_id, dataToSend);
                 setExito('Usuario actualizado exitosamente');
             } else {
@@ -127,7 +160,20 @@ const GestionUsuarios = () => {
                     setError('La contraseña debe tener al menos 6 caracteres');
                     return;
                 }
-                await usuariosService.create(formData);
+                // Validar que las contraseñas coincidan
+                if (formData.password !== formData.passwordConfirmar) {
+                    setError('Las contraseñas no coinciden');
+                    return;
+                }
+                
+                const dataToSend = {
+                    username: formData.username,
+                    password: formData.password,
+                    rol: formData.rol,
+                    activo: formData.activo
+                };
+                
+                await usuariosService.create(dataToSend);
                 setExito('Usuario creado exitosamente');
             }
             await cargarUsuarios();
@@ -452,6 +498,11 @@ const GestionUsuarios = () => {
                             </h2>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6">
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded">
+                                    {error}
+                                </div>
+                            )}
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -466,9 +517,10 @@ const GestionUsuarios = () => {
                                         placeholder="nombre.usuario"
                                     />
                                 </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Contraseña {usuarioSeleccionado ? '(dejar vacío para no cambiar)' : '*'}
+                                        {usuarioSeleccionado ? 'Nueva Contraseña' : 'Contraseña *'}
                                     </label>
                                     <input
                                         type="password"
@@ -479,7 +531,53 @@ const GestionUsuarios = () => {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                         placeholder="Mínimo 6 caracteres"
                                     />
+                                    {usuarioSeleccionado && (
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Dejar vacío para no cambiar la contraseña
+                                        </p>
+                                    )}
                                 </div>
+
+                                {/* Mostrar confirmación y contraseña actual si se está ingresando una nueva contraseña */}
+                                {(!usuarioSeleccionado || formData.password) && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                {usuarioSeleccionado ? 'Confirmar Nueva Contraseña *' : 'Confirmar Contraseña *'}
+                                            </label>
+                                            <input
+                                                type="password"
+                                                required
+                                                minLength="6"
+                                                value={formData.passwordConfirmar}
+                                                onChange={(e) => setFormData({...formData, passwordConfirmar: e.target.value})}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                                placeholder="Repite la contraseña"
+                                            />
+                                        </div>
+
+                                        {/* Contraseña actual (solo en edición) */}
+                                        {usuarioSeleccionado && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    Contraseña Actual *
+                                                </label>
+                                                <input
+                                                    type="password"
+                                                    required
+                                                    value={formData.passwordActual}
+                                                    onChange={(e) => setFormData({...formData, passwordActual: e.target.value})}
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                                    placeholder="Ingresa tu contraseña actual"
+                                                />
+                                                <p className="mt-1 text-xs text-gray-500">
+                                                    Requerida para cambiar la contraseña
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Rol *

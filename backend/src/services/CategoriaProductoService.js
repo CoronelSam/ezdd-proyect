@@ -98,7 +98,7 @@ class CategoriaProductoService {
         throw new Error('Categoría no encontrada');
       }
 
-      // Verificar si tiene productos activos
+      // Contar productos activos (solo para informar)
       const productosActivos = await Producto.count({
         where: { 
           id_categoria: id,
@@ -106,14 +106,14 @@ class CategoriaProductoService {
         }
       });
 
-      if (productosActivos > 0) {
-        throw new Error('No se puede desactivar una categoría con productos activos');
-      }
-
       // Soft delete: cambiar el estado a inactiva
+      // Permitir desactivar incluso con productos activos
       await categoria.update({ activa: false });
 
-      return { mensaje: 'Categoría desactivada exitosamente' };
+      return { 
+        mensaje: 'Categoría desactivada exitosamente',
+        productos_afectados: productosActivos
+      };
     } catch (error) {
       throw error;
     }

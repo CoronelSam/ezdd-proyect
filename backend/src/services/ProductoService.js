@@ -53,14 +53,24 @@ class ProductoService {
       }
 
       const PrecioProducto = require('../models/PrecioProductoModel');
+      
+      // Configurar el include de categoría
+      const categoriaInclude = {
+        model: CategoriaProducto,
+        as: 'categoria',
+        attributes: ['id_categoria', 'nombre', 'activa']
+      };
+
+      // Si se filtran solo productos activos, también filtrar solo categorías activas
+      if (filtros.activo === true || filtros.solo_categorias_activas === true) {
+        categoriaInclude.where = { activa: true };
+        categoriaInclude.required = true; // INNER JOIN para excluir productos sin categoría activa
+      }
+
       const productos = await Producto.findAll({
         where,
         include: [
-          {
-            model: CategoriaProducto,
-            as: 'categoria',
-            attributes: ['id_categoria', 'nombre']
-          },
+          categoriaInclude,
           {
             model: PrecioProducto,
             as: 'precio_default',

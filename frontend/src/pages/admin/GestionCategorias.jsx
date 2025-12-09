@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { categoriasService } from '../../services';
+import ModalConfirmacion from '../../components/ModalConfirmacion';
 
 const GestionCategorias = () => {
     const [categorias, setCategorias] = useState([]);
@@ -7,6 +8,15 @@ const GestionCategorias = () => {
     const [modalAbierto, setModalAbierto] = useState(false);
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
     const [busqueda, setBusqueda] = useState('');
+    const [modalConfirmacion, setModalConfirmacion] = useState({
+        mostrar: false,
+        tipo: 'advertencia',
+        titulo: '',
+        mensaje: '',
+        descripcion: '',
+        accion: null,
+        categoriaId: null
+    });
 
     const [formData, setFormData] = useState({
         nombre: '',
@@ -54,7 +64,7 @@ const GestionCategorias = () => {
         e.preventDefault();
         try {
             if (categoriaSeleccionada) {
-                await categoriasService.update(categoriaSeleccionada.id_categoria_producto, formData);
+                await categoriasService.update(categoriaSeleccionada.id_categoria, formData);
             } else {
                 await categoriasService.create(formData);
             }
@@ -62,19 +72,86 @@ const GestionCategorias = () => {
             cerrarModal();
         } catch (error) {
             console.error('Error al guardar categoría:', error);
-            alert('Error al guardar la categoría');
+            const errorMessage = error.response?.data?.detalles 
+                ? error.response.data.detalles.map(d => d.msg || d).join(', ')
+                : error.response?.data?.error || 'Error al guardar la categoría';
+            alert(errorMessage);
         }
     };
 
-    const eliminarCategoria = async (id) => {
-        if (window.confirm('¿Estás seguro? Esta acción eliminará la categoría y puede afectar los productos asociados.')) {
-            try {
-                await categoriasService.delete(id);
-                await cargarCategorias();
-            } catch (error) {
-                console.error('Error al eliminar:', error);
-                alert('Error al eliminar. Puede que existan productos asociados a esta categoría.');
+    const abrirModalDesactivar = (id) => {
+        setModalConfirmacion({
+            mostrar: true,
+            tipo: 'advertencia',
+            titulo: '¿Desactivar categoría?',
+            mensaje: 'Los productos de esta categoría no estarán disponibles para los clientes',
+            descripcion: 'Útil para casos como ley seca, falta de ingredientes o menús temporales. Podrás reactivarla en cualquier momento.',
+            accion: 'desactivar',
+            categoriaId: id
+        });
+    };
+
+    const abrirModalEliminar = (id) => {
+        setModalConfirmacion({
+            mostrar: true,
+            tipo: 'peligro',
+            titulo: '⚠️ Eliminar permanentemente',
+            mensaje: 'Esta acción NO se puede deshacer',
+            descripcion: 'Se eliminará la categoría y toda su información de forma permanente',
+            accion: 'eliminar',
+            categoriaId: id
+        });
+    };
+
+    const cerrarModalConfirmacion = () => {
+        setModalConfirmacion({
+            mostrar: false,
+            tipo: 'advertencia',
+            titulo: '',
+            mensaje: '',
+            descripcion: '',
+            accion: null,
+            categoriaId: null
+        });
+    };
+
+    const confirmarAccion = async () => {
+        const { accion, categoriaId } = modalConfirmacion;
+        
+        try {
+            if (accion === 'desactivar') {
+                const resultado = await categoriasService.delete(categoriaId);
+                // Mostrar mensaje si hay productos afectados
+                if (resultado?.productos_afectados > 0) {
+                    alert(`✅ Categoría desactivada exitosamente.\n\n${resultado.productos_afectados} producto(s) activo(s) ya no estarán disponibles para los clientes.`);
+                }
+            } else if (accion === 'eliminar') {
+                await categoriasService.deletePermanente(categoriaId);
             }
+            await cargarCategorias();
+            cerrarModalConfirmacion();
+        } catch (error) {
+            console.error(`Error al ${accion}:`, error);
+            let errorMessage = error.response?.data?.error || `Error al ${accion} la categoría`;
+            
+            // Personalizar mensaje según el error
+            if (errorMessage.includes('productos asociados')) {
+                errorMessage = '❌ No se puede eliminar esta categoría porque tiene productos asociados.\n\nPrimero debes eliminar o reasignar todos los productos de esta categoría.';
+            }
+            
+            alert(errorMessage);
+            cerrarModalConfirmacion();
+        }
+    };
+
+    const reactivarCategoria = async (id) => {
+        try {
+            await categoriasService.reactivar(id);
+            await cargarCategorias();
+        } catch (error) {
+            console.error('Error al reactivar:', error);
+            const errorMessage = error.response?.data?.error || 'Error al reactivar la categoría';
+            alert(errorMessage);
         }
     };
 
@@ -125,10 +202,12 @@ const GestionCategorias = () => {
                 {/* Lista de Categorías */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {categoriasFiltradas.map((categoria) => (
-                        <div key={categoria.id_categoria_producto} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+                        <div key={categoria.id_categoria} className={`bg-white rounded-lg shadow hover:shadow-lg transition p-6 ${!categoria.activa ? 'opacity-75 border-2 border-yellow-200' : ''}`}>
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{categoria.nombre}</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                        {categoria.nombre}
+                                    </h3>
                                     <p className="text-sm text-gray-600">
                                         {categoria.descripcion || 'Sin descripción'}
                                     </p>
@@ -139,21 +218,53 @@ const GestionCategorias = () => {
                                     </svg>
                                 </div>
                             </div>
-                            <div className="pt-4 border-t border-gray-200 flex gap-2">
-                                <button
-                                    onClick={() => abrirModal(categoria)}
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition text-sm font-medium shadow-md"
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    onClick={() => eliminarCategoria(categoria.id_categoria_producto)}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-                                >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                            <div className="pt-4 border-t border-gray-200 space-y-2">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => abrirModal(categoria)}
+                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition text-sm font-medium shadow-md"
+                                    >
+                                        Editar
+                                    </button>
+                                    {categoria.activa ? (
+                                        <button
+                                            onClick={() => abrirModalDesactivar(categoria.id_categoria)}
+                                            className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm font-medium"
+                                            title="Desactivar categoría"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => reactivarCategoria(categoria.id_categoria)}
+                                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-sm font-medium"
+                                            title="Reactivar categoría"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => abrirModalEliminar(categoria.id_categoria)}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
+                                        title="Eliminar permanentemente"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                {!categoria.activa && (
+                                    <div className="flex items-center justify-center gap-2 text-xs text-yellow-600 bg-yellow-50 py-1 px-2 rounded">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        Desactivada
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -225,6 +336,19 @@ const GestionCategorias = () => {
                     </div>
                 </div>
             )}
+
+            {/* Modal de Confirmación */}
+            <ModalConfirmacion
+                mostrar={modalConfirmacion.mostrar}
+                tipo={modalConfirmacion.tipo}
+                titulo={modalConfirmacion.titulo}
+                mensaje={modalConfirmacion.mensaje}
+                descripcion={modalConfirmacion.descripcion}
+                textoBotonConfirmar={modalConfirmacion.accion === 'desactivar' ? 'Desactivar' : 'Eliminar'}
+                textoBotonCancelar="Cancelar"
+                onConfirmar={confirmarAccion}
+                onCancelar={cerrarModalConfirmacion}
+            />
         </div>
     );
 };

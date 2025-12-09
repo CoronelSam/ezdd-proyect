@@ -72,7 +72,8 @@ class ProductoController {
     try {
       const filtros = {
         activo: req.query.activo !== undefined ? req.query.activo === 'true' : undefined,
-        id_categoria: req.query.id_categoria
+        id_categoria: req.query.id_categoria,
+        solo_categorias_activas: req.query.solo_categorias_activas === 'true'
       };
 
       const productos = await ProductoService.obtenerProductos(filtros);

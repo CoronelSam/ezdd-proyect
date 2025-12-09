@@ -64,9 +64,10 @@ function ProductosCliente() {
             setError(null);
 
             // Cargar productos, categorías y precios en paralelo
+            // Solo productos activos con categorías activas para clientes
             const [productosData, categoriasData] = await Promise.all([
-                productosService.getAll(),
-                categoriasService.getAll({ activo: true })
+                productosService.getAll({ activo: true, solo_categorias_activas: true }),
+                categoriasService.getAll({ activa: true })
             ]);
 
             // Crear un mapa para almacenar precios por producto
