@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 import authService from '../../services/auth.service';
 
 const Registro = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
     const [formData, setFormData] = useState({
         nombre: '',
         telefono: '',
@@ -69,14 +67,13 @@ const Registro = () => {
             const response = await authService.registrarCliente(datos);
 
             if (response.success && response.data) {
-                // Registrar sesión en el contexto
-                login(response.data);
-                
-                // Guardar ID del cliente
-                localStorage.setItem('id_cliente', response.data.id_cliente);
-                
-                // Redirigir al menú
-                navigate('/menu');
+                // Redirigir a login con mensaje de éxito
+                navigate('/login', { 
+                    state: { 
+                        mensaje: 'Cuenta creada exitosamente. Por favor, inicia sesión.',
+                        email: formData.email 
+                    } 
+                });
             } else {
                 setError(response.error || 'Error al crear la cuenta');
             }

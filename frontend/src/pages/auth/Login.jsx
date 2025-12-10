@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import authService from '../../services/auth.service';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
     const [tipoUsuario, setTipoUsuario] = useState('cliente');
     const [formData, setFormData] = useState({
@@ -12,7 +13,20 @@ const Login = () => {
         clave: ''
     });
     const [error, setError] = useState('');
+    const [mensajeExito, setMensajeExito] = useState('');
     const [cargando, setCargando] = useState(false);
+
+    // Cargar mensaje y email desde el registro
+    useEffect(() => {
+        if (location.state?.mensaje) {
+            setMensajeExito(location.state.mensaje);
+            if (location.state.email) {
+                setFormData(prev => ({ ...prev, email: location.state.email }));
+            }
+            // Limpiar el state para que no se muestre de nuevo al navegar
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     const handleChange = (e) => {
         setFormData({
@@ -20,6 +34,7 @@ const Login = () => {
             [e.target.name]: e.target.value
         });
         setError('');
+        setMensajeExito(''); // Limpiar mensaje de éxito al editar
     };
 
     const handleSubmit = async (e) => {
@@ -102,6 +117,12 @@ const Login = () => {
 
                     {/* Formulario */}
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        {mensajeExito && (
+                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                                {mensajeExito}
+                            </div>
+                        )}
+                        
                         {error && (
                             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                                 {error}
